@@ -86,8 +86,8 @@ void MC_BOOSTEDHBB::init() {
     // TODO
     // don't include high-pt neutrinos or leptons in jets
     // include electrons?
-    IdentifiedFinalState nufs(FinalState(-2.5, 2.5, 25*GeV));
-    nufs.acceptNeutrinos();
+    IdentifiedFinalState nufs(FinalState(-2.5, 2.5, 25*GeV)); //This will look for a range of particle specified by their pid
+    nufs.acceptNeutrinos(); //Here we specify what particle we are looking for.In this case any Neutrino.
 
     MergedFinalState leptonsAndNeutrinos(clfs, nufs);
     addProjection(leptonsAndNeutrinos, "LeptonsAndNeutrinos");
@@ -150,22 +150,21 @@ void MC_BOOSTEDHBB::analyze(const Event& event) {
         applyProjection<ChargedLeptons>(event, "ChargedLeptons").particles();
 
     const Particle& mm =
-        Particle(0, -applyProjection<MissingMomentum>(event, "MissingMomentum").visibleMomentum());
-
+        Particle(0, -applyProjection<MissingMomentum>(event, "MissingMomentum").visibleMomentum()); //Note the 4 vector momentum should sum to zero so if visible momentum is none zero is must be balanced in the opposite direction.
 
     const Jets& akt03tjs =
-        applyProjection<FastJets>(event, "AntiKt03TrackJets").jetsByPt(25*GeV);
-    const Jets& akt03tbjs = bTagged(akt03tjs);
+        applyProjection<FastJets>(event, "AntiKt03TrackJets").jetsByPt(25*GeV);//Look for jet over 25 GeV in the tracker. 
+    const Jets& akt03tbjs = bTagged(akt03tjs);//Now from these jets the one which we have b tagged.
 
     const Jets& akt04cjs =
-        applyProjection<FastJets>(event, "AntiKt04CaloJets").jetsByPt(25*GeV);
+        applyProjection<FastJets>(event, "AntiKt04CaloJets").jetsByPt(25*GeV);//Here we get the jets over 25 GeV from the calo.
     const Jets& akt04cbjs = bTagged(akt04cjs);
 
     const Jets& akt10cjs =
-        applyProjection<FastJets>(event, "AntiKt10CaloJets").jetsByPt(250*GeV);
+        applyProjection<FastJets>(event, "AntiKt10CaloJets").jetsByPt(250*GeV);//Again find jets over 250 GeV in the calo.
 
     const Jets& aktvrcjs =
-        applyProjection<FastJets>(event, "AntiKtVRCaloJets").jetsByPt(25*GeV);
+        applyProjection<FastJets>(event, "AntiKtVRCaloJets").jetsByPt(25*GeV);//Now we look for jets over 25 GeV in the calo with the variableR algorithm.
     const Jets& aktvrcbjs = bTagged(aktvrcjs);
 
 
