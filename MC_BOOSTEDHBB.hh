@@ -57,14 +57,24 @@ namespace Rivet {
                 ZLLBOOSTEDHBB,      // 24
                 TWOAKTVRJETSINC,
                 TWOAKTVRJETSEXC,
+                TWOAKTVRJETSTRACKERINC,
+                TWOAKTVRJETSTRACKEREXC,
                 VRHB,
                 VRHBB,
+                VRHBTRACKER,
+                VRHBBTRACKER,
                 WLNUVRHB,
                 WLNUVRHBB,
+                WLNUVRHBTRACKER,
+                WLNUVRHBBTRACKER,
                 ZNUNUVRHB,
                 ZNUNUVRHBB,
+                ZNUNUVRHBTRACKER,
+                ZNUNUVRHBBTRACKER,
                 ZLLVRHB,
                 ZLLVRHBB,
+                ZLLVRHBTRACKER,
+                ZLLVRHBBTRACKER,
                 CUTSLEN
             };
 

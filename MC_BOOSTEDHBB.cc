@@ -104,10 +104,15 @@ void MC_BOOSTEDHBB::init() {
     addProjection(FastJets(caloParts, FastJets::ANTIKT, 0.4), "AntiKt04CaloJets");
     addProjection(FastJets(caloParts, FastJets::ANTIKT, 1.0), "AntiKt10CaloJets");
 
-    // variable-R jets
+    // variable-R jets. With the Calo.
     fastjet::JetDefinition::Plugin *vrplug =
         new fastjet::contrib::VariableRPlugin(60*GeV /* rho < mH */, 0.2, 0.6, fastjet::contrib::VariableRPlugin::AKTLIKE);
-    addProjection(FastJets(caloParts, vrplug), "AntiKtVRCaloJets");
+    addProjection(FastJets(caloParts, vrplug), "AntiKtVRCaloJets");//rho=60 GeV where R=rho/pt and minR=0.2 and maxR=0.6
+
+    // variable-R jets. With the Calo.
+    fastjet::JetDefinition::Plugin *vrPlugTrack =
+        new fastjet::contrib::VariableRPlugin(60*GeV /* rho < mH */, 0.2, 0.6, fastjet::contrib::VariableRPlugin::AKTLIKE);//Here we create specify the jet definition 
+    addProjection(FastJets(trackParts, vrPlugTrack), "AntiKtVRTrackJets");//Here we add the projection and call it usign the string argument. 
 
 
     // register Z and W bosons
@@ -164,25 +169,28 @@ void MC_BOOSTEDHBB::analyze(const Event& event) {
         applyProjection<FastJets>(event, "AntiKt10CaloJets").jetsByPt(250*GeV);//Again find jets over 250 GeV in the calo.
 
     const Jets& aktvrcjs =
-        applyProjection<FastJets>(event, "AntiKtVRCaloJets").jetsByPt(25*GeV);//Now we look for jets over 25 GeV in the calo with the variableR algorithm.
+        applyProjection<FastJets>(event, "AntiKtVRCaloJets").jetsByPt(25*GeV);//Now we use the variableR algorithm to search for jets in the calo. 
     const Jets& aktvrcbjs = bTagged(aktvrcjs);
 
+    const Jets& antiKtVRTrackJets =
+        applyProjection<FastJets>(event, "AntiKtVRTrackJets").jetsByPt(25*GeV);//Now we use the variableR algorithm to search for jets in the calo. 
+    const Jets& antiKtVRTrackJetsBTagged = bTagged(antiKtVRTrackJets);
 
     // find vboson
     Particle vboson;
-    if (zeebosons.size() && leptons.size() == 2) {
+    if (zeebosons.size() && leptons.size() == 2){ //We look for a single Z boson that has decayed into 2 leptons. 
         vboson = zeebosons[0];
         cutBits[ZLL] = true;
     } else if (zmumubosons.size() && leptons.size() == 2) {
         vboson = zmumubosons[0];
         cutBits[ZLL] = true;
-    } else if (wenubosons.size() && leptons.size() == 1) {
+    } else if (wenubosons.size() && leptons.size() == 1) {//We look for a single W boson decaying into electron/muon and Neutrino. 
         vboson = wenubosons[0];
         cutBits[WLNU] = true;
     } else if (wmunubosons.size() && leptons.size() == 1) {
         vboson = wmunubosons[0];
         cutBits[WLNU] = true;
-    } else if (leptons.size() == 0 && mm.pT() > 30*GeV) {
+    } else if (leptons.size() == 0 && mm.pT() > 30*GeV) { //This is looking for a single Z boson decaying into 2 Neutrinos. We look for missing momentum.
         vboson = Particle(23, mm);
         cutBits[ZNUNU] = true;
     }
@@ -197,20 +205,21 @@ void MC_BOOSTEDHBB::analyze(const Event& event) {
     // exactly one akt10 calo jet
     // all track jets in event must be in the calo jet cone
 
-    if (akt10cjs.size())
-        cutBits[ONEAKT10JETINC] = true;
+    if (akt10cjs.size()) //Look for high energy=250 GeV jet in calo and large R=10 value
+        cutBits[ONEAKT10JETINC] = true;	
 
     // exactly one akt10 calo jet
     if (akt10cjs.size() == 1) {
         cutBits[ONEAKT10JETEXC] = true;
-        cutBits[BOOSTEDHB] = akt03tbjs.size() == 1;
-        cutBits[BOOSTEDHBB] = akt03tbjs.size() >= 2;
+				//Now we look within the jet in the calo with high energy and R=10 into smaller jets in the tracker
+        cutBits[BOOSTEDHB] = akt03tbjs.size() == 1; //Now look for low energy single 25 GeV jet in the tracker with R=0.3. Which is b tagged.
+        cutBits[BOOSTEDHBB] = akt03tbjs.size() >= 2; //Same again but 2 tracks this time both b tagged.
 
         boostedhiggs = Particle(25, akt10cjs[0].mom());
 
-        // all track jets in event must be in the calo jet cone
+        // all track jets in event must be in the calo jet cone. If not then we assume we have not found higgs jets
         foreach (const Jet& tj, akt03tjs) {
-            if (Rivet::deltaR(boostedhiggs, tj) > 1.0) {
+            if (Rivet::deltaR(boostedhiggs, tj) > 1.0) { //DeltaR is the difference in pseudo rapidity and azimuthal angle between them. 
                 cutBits[BOOSTEDHB] = false;
                 cutBits[BOOSTEDHBB] = false;
                 break;
@@ -222,7 +231,7 @@ void MC_BOOSTEDHBB::analyze(const Event& event) {
     // find resolved higgs
     Particle resolvedhiggs;
 
-    if (akt04cjs.size() >= 2)
+    if (akt04cjs.size() >= 2) //Same again Energy=25 GeV but with larger R=0.4 constant. 
         cutBits[TWOAKT04JETSINC] = true;
 
     // very simple resolved higgs tagging
@@ -235,20 +244,32 @@ void MC_BOOSTEDHBB::analyze(const Event& event) {
         resolvedhiggs = Particle(25, akt04cjs[0].mom() + akt04cjs[1].mom());
     }
 
-
+		//Look for higgs with VariableR algorithm in calo. 
     Particle vrhiggs;
     if (aktvrcjs.size() >= 2)
-        cutBits[TWOAKTVRJETSINC] = true;
+        cutBits[TWOAKTVRJETSINC] = true; //Inclusive: More than 2 jets. 
 
-    if (aktvrcjs.size() == 2) {
+    if (aktvrcjs.size() == 2) { //If we have found two jets then add 4 vector together to get the variable Higgs. 
         cutBits[TWOAKTVRJETSEXC] = true;
         cutBits[VRHB] = aktvrcbjs.size() == 1;
         cutBits[VRHBB] = aktvrcbjs.size() == 2;
 
         vrhiggs = Particle(25, aktvrcjs[0].mom() + aktvrcjs[1].mom());
     }
+		//This is the variableR algorithm in the tracker.
+    Particle vrHiggsTracker;
+    if (antiKtVRTrackJets.size() >= 2)
+        cutBits[TWOAKTVRJETSTRACKERINC] = true; //Exclusive: Only 2 jets.
 
+    if (antiKtVRTrackJets.size() == 2) { //If we have found two jets then add 4 vector together to get the variable Higgs. 
+        cutBits[TWOAKTVRJETSTRACKEREXC] = true;
+        cutBits[VRHBTRACKER] = antiKtVRTrackJetsBTagged.size() == 1;
+        cutBits[VRHBBTRACKER] = antiKtVRTrackJetsBTagged.size() == 2;
 
+				vrHiggsTracker = Particle(25, antiKtVRTrackJets[0].mom() +antiKtVRTrackJets[1].mom());
+    }
+
+		//Now associate Higgs information to lepton informtion in one set of truth bits. 
     if (cutBits[ZLL]) {
         cutBits[ZLLBOOSTEDHB] = cutBits[BOOSTEDHB];
         cutBits[ZLLBOOSTEDHBB] = cutBits[BOOSTEDHBB];
@@ -256,6 +277,8 @@ void MC_BOOSTEDHBB::analyze(const Event& event) {
         cutBits[ZLLRESOLVEDHBB] = cutBits[RESOLVEDHBB];
         cutBits[ZLLVRHB] = cutBits[VRHB];
         cutBits[ZLLVRHBB] = cutBits[VRHBB];
+        cutBits[ZLLVRHBTRACKER] = cutBits[VRHBTRACKER];
+        cutBits[ZLLVRHBBTRACKER] = cutBits[VRHBBTRACKER];
     } else if (cutBits[WLNU]) {
         cutBits[WLNUBOOSTEDHB] = cutBits[BOOSTEDHB];
         cutBits[WLNUBOOSTEDHBB] = cutBits[BOOSTEDHBB];
@@ -263,6 +286,9 @@ void MC_BOOSTEDHBB::analyze(const Event& event) {
         cutBits[WLNURESOLVEDHBB] = cutBits[RESOLVEDHBB];
         cutBits[WLNUVRHB] = cutBits[VRHB];
         cutBits[WLNUVRHBB] = cutBits[VRHBB];
+        cutBits[WLNUVRHBTRACKER] = cutBits[VRHBTRACKER];
+        cutBits[WLNUVRHBBTRACKER] = cutBits[VRHBBTRACKER];
+
     } else if (cutBits[ZNUNU]) {
         cutBits[ZNUNUBOOSTEDHB] = cutBits[BOOSTEDHB];
         cutBits[ZNUNUBOOSTEDHBB] = cutBits[BOOSTEDHBB];
@@ -270,6 +296,9 @@ void MC_BOOSTEDHBB::analyze(const Event& event) {
         cutBits[ZNUNURESOLVEDHBB] = cutBits[RESOLVEDHBB];
         cutBits[ZNUNUVRHB] = cutBits[VRHB];
         cutBits[ZNUNUVRHBB] = cutBits[VRHBB];
+        cutBits[ZNUNUVRHBTRACKER] = cutBits[VRHBTRACKER];
+        cutBits[ZNUNUVRHBBTRACKER] = cutBits[VRHBBTRACKER];
+
     }
 
 
@@ -334,6 +363,21 @@ void MC_BOOSTEDHBB::analyze(const Event& event) {
         fillFourMom(channel, "vboson", vboson, weight);
         fillFourMomPair(channel, "vboson_higgs", vboson.mom(), higgs.mom(), weight);
     } 
+		//This is addition of jet search with variableR algorithm in tracker.
+		if (cutBits[VRHBBTRACKER]) {
+        channel = lepchan + "VRTrackerHbb";
+        higgs = vrHiggsTracker;
+      //  fillFourMom(channel, "higgs", higgs.mom(), weight); //This does not seem to work even for vboson
+				fillFourMom(channel, "vboson", vboson, weight);
+      //  fillFourMomPair(channel, "vboson_higgs", vboson.mom(), higgs.mom(), weight);
+    } else if (cutBits[VRHBTRACKER]) {
+        channel = lepchan + "VRTrackerHb";
+        higgs = vrHiggsTracker;
+      //  fillFourMom(channel, "higgs", higgs.mom(), weight);
+   //     fillFourMom(channel, "vboson", vboson, weight);
+      //  fillFourMomPair(channel, "vboson_higgs", vboson.mom(), higgs.mom(), weight);
+    } 
+
 
     return;
 }
