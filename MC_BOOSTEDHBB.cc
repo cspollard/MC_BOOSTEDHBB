@@ -16,6 +16,7 @@
 #include "Rivet/Projections/ZFinder.hh"
 #include "Rivet/Projections/WFinder.hh"
 #include "Rivet/Projections/MissingMomentum.hh"
+#include "Rivet/Projections/HeavyHadrons.hh"
 
 #include "Rivet/Jet.hh"
 #include "Rivet/Projections/FastJets.hh"
@@ -114,6 +115,8 @@ void MC_BOOSTEDHBB::init() {
         new fastjet::contrib::VariableRPlugin(60*GeV /* rho < mH */, 0.2, 0.6, fastjet::contrib::VariableRPlugin::AKTLIKE);//Here we create specify the jet definition 
     addProjection(FastJets(trackParts, vrPlugTrack), "AntiKtVRTrackJets");//Here we add the projection and call it usign the string argument. 
 
+		//This is to look for the b hadrons.
+		addProjection(HeavyHadrons(-2.5,2.5,25*GeV), "HeavyHadrons");
 
     // register Z and W bosons
     bookFourMom("vboson");
@@ -173,7 +176,7 @@ void MC_BOOSTEDHBB::analyze(const Event& event) {
     const Jets& aktvrcbjs = bTagged(aktvrcjs);
 
     const Jets& antiKtVRTrackJets =
-        applyProjection<FastJets>(event, "AntiKtVRTrackJets").jetsByPt(25*GeV);//Now we use the variableR algorithm to search for jets in the calo. 
+        applyProjection<FastJets>(event, "AntiKtVRTrackJets").jetsByPt(25*GeV);//Now we use the variableR algorithm to search for jets in the tracker. 
     const Jets& antiKtVRTrackJetsBTagged = bTagged(antiKtVRTrackJets);
 
     // find vboson
@@ -205,13 +208,13 @@ void MC_BOOSTEDHBB::analyze(const Event& event) {
     // exactly one akt10 calo jet
     // all track jets in event must be in the calo jet cone
 
-    if (akt10cjs.size()) //Look for high energy=250 GeV jet in calo and large R=10 value
+    if (akt10cjs.size()) //Look for high energy=250 GeV jet in calo and large R=1 value
         cutBits[ONEAKT10JETINC] = true;	
 
     // exactly one akt10 calo jet
     if (akt10cjs.size() == 1) {
         cutBits[ONEAKT10JETEXC] = true;
-				//Now we look within the jet in the calo with high energy and R=10 into smaller jets in the tracker
+				//Now we look within the jet in the calo with high energy and R=1 into smaller jets in the tracker
         cutBits[BOOSTEDHB] = akt03tbjs.size() == 1; //Now look for low energy single 25 GeV jet in the tracker with R=0.3. Which is b tagged.
         cutBits[BOOSTEDHBB] = akt03tbjs.size() >= 2; //Same again but 2 tracks this time both b tagged.
 
@@ -226,7 +229,7 @@ void MC_BOOSTEDHBB::analyze(const Event& event) {
             }
         }
     }
-
+		//Now look for VariableR track jets in association with a constant R=1 for the calo.
 
     // find resolved higgs
     Particle resolvedhiggs;
@@ -268,6 +271,8 @@ void MC_BOOSTEDHBB::analyze(const Event& event) {
 
 				vrHiggsTracker = Particle(25, antiKtVRTrackJets[0].mom() +antiKtVRTrackJets[1].mom());
     }
+		//Here we look for b hadrons. 
+		const Particles& bhads = applyProjection<HeavyHadrons>(event, "HeavyHadrons").bHadrons();
 
 		//Now associate Higgs information to lepton informtion in one set of truth bits. 
     if (cutBits[ZLL]) {
