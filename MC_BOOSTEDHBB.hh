@@ -55,6 +55,8 @@ namespace Rivet {
                 ZNUNUBOOSTEDHBB,    // 22
                 ZLLBOOSTEDHB,       // 23
                 ZLLBOOSTEDHBB,      // 24
+								BHADRONSFOUND,
+								BHADRONFOUNDSINGLE,
                 TWOAKTVRJETSINC,
                 TWOAKTVRJETSEXC,
                 TWOAKTVRJETSTRACKERINC,

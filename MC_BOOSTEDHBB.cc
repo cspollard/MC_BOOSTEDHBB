@@ -36,7 +36,6 @@ const string mlab = "mass / GeV";
 const string drlab = "$\\Delta R";
 const string etalab = "$\\eta";
 const string philab = "$\\phi";
-
 namespace Rivet {
 
 /// @name Analysis methods
@@ -97,8 +96,8 @@ void MC_BOOSTEDHBB::init() {
     caloParts.addVetoOnThisFinalState(leptonsAndNeutrinos);//Here we appear veto if we find a lepton  
 
     // track jets constituents
-    VetoedFinalState trackParts(ChargedFinalState(-2.5, 2.5, 0.5*GeV));
-    trackParts.addVetoOnThisFinalState(leptonsAndNeutrinos);
+		VetoedFinalState trackParts(ChargedFinalState(-2.5, 2.5, 0.5*GeV));
+		trackParts.addVetoOnThisFinalState(leptonsAndNeutrinos);
 
     // register jet collections
 //    addProjection(FastJets(trackParts, FastJets::ANTIKT, 0.3), "AntiKt03TrackJets");
@@ -116,7 +115,7 @@ void MC_BOOSTEDHBB::init() {
     addProjection(FastJets(trackParts, vrPlugTrack), "AntiKtVRTrackJets");//Here we add the projection and call it usign the string argument. 
 
 		//This is to look for the b hadrons. We do this to find the exact location of the b-Hadron relative to the centre of the jet.
-		addProjection(HeavyHadrons(-2.5,2.5,25*GeV), "HeavyHadrons");
+		addProjection(HeavyHadrons(-2.5,2.5,0.5*GeV), "HeavyHadrons");
 
     // register Z and W bosons
     bookFourMom("vboson");
@@ -240,7 +239,7 @@ void MC_BOOSTEDHBB::analyze(const Event& event) {
 
         // all track jets in event must be in the calo jet cone. If not then we assume we have not found higgs jets
         foreach (const Jet& tj, antiKtVRTrackJets) {
-            if (Rivet::deltaR(boostedhiggs, tj) > 1.0) { //DeltaR is the difference in pseudo rapidity and azimuthal angle between them. 
+            if (Rivet::deltaR(boostedhiggs, tj) > 10.0) { //DeltaR is the difference in pseudo rapidity and azimuthal angle between them. 
                 cutBits[BOOSTEDHB] = false;
                 cutBits[BOOSTEDHBB] = false;
                 break;
@@ -289,9 +288,15 @@ void MC_BOOSTEDHBB::analyze(const Event& event) {
 
 				vrHiggsTracker = Particle(25, antiKtVRTrackJets[0].mom() +antiKtVRTrackJets[1].mom());
     }
-		//Here we look for b hadrons. 
-		const Particles& bhads = applyProjection<HeavyHadrons>(event, "HeavyHadrons").bHadrons();
 */
+		//Here we look for b hadrons. We look for b-hadron separate from the jet so we can determine the deltaR between the jet and B-hadron. Note should compare to the nearest jet.  
+		const Particles& bhads = applyProjection<HeavyHadrons>(event, "HeavyHadrons").bHadrons();
+    if (bhads.size()){
+			cutBits[BHADRONSFOUND] = true;
+		}
+    if (bhads.size() == 1){
+			cutBits[BHADRONFOUNDSINGLE] = true;
+		}
 		//Now associate Higgs information to lepton informtion in one set of truth bits. 
     if (cutBits[ZLL]) {
         cutBits[ZLLBOOSTEDHB] = cutBits[BOOSTEDHB];
@@ -323,8 +328,6 @@ void MC_BOOSTEDHBB::analyze(const Event& event) {
         cutBits[ZNUNUVRHBBTRACKER] = cutBits[VRHBBTRACKER];
 
     }
-
-
     // fill cuts.
     for (int iCut = 0; iCut < CUTSLEN; ++iCut)
         if (cutBits[iCut])
@@ -357,6 +360,9 @@ void MC_BOOSTEDHBB::analyze(const Event& event) {
         fillFourMom(channel, "higgs", higgs.mom(), weight);
         fillFourMom(channel, "vboson", vboson, weight);
         fillFourMomPair(channel, "vboson_higgs", vboson.mom(), higgs.mom(), weight);
+				if(cutBits[BHADRONSFOUND]){
+					fillFourMomPair(channel, "BHadron_TrackJet", bhads.at(0).mom(), antiKtVRTrackJetsBTagged.at(0).mom(), weight);//We assume only one b hadron since only 1 tagged jet. This might be a bad idea.
+				}
     } 
 /*
     if (cutBits[RESOLVEDHBB]) {
