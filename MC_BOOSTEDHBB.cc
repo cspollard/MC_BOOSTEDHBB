@@ -29,7 +29,6 @@ using std::string;
 using namespace Rivet::Cuts;
 
 
-// TODO
 // global variables. ick
 const string ptlab = "$p_T$ / GeV";
 const string mlab = "mass / GeV";
@@ -43,36 +42,22 @@ namespace Rivet {
 
 /// Book histograms and initialise projections before the run
 void MC_BOOSTEDHBB::init() {
-    // getLog().setLevel(Log::DEBUG);
-
+    bookChannel("AllChannels");
     bookChannel("ZllBoostedHbb");
     bookChannel("ZllBoostedHb");
-//    bookChannel("ZllResolvedHbb");
-//    bookChannel("ZllResolvedHb");
-//    bookChannel("ZllVRHbb");
- //   bookChannel("ZllVRHb");
 
     bookChannel("WlnuBoostedHbb");
     bookChannel("WlnuBoostedHb");
- //   bookChannel("WlnuResolvedHbb");
-//    bookChannel("WlnuResolvedHb");
-//    bookChannel("WlnuVRHbb");
-//    bookChannel("WlnuVRHb");
 
     bookChannel("ZnunuBoostedHbb");
     bookChannel("ZnunuBoostedHb");
-  ///  bookChannel("ZnunuResolvedHbb");
- //   bookChannel("ZnunuResolvedHb");
-//    bookChannel("ZnunuVRHbb");
-//    bookChannel("ZnunuVRHb");
-
 
     ChargedLeptons clfs(FinalState(-2.5, 2.5, 25*GeV));
     addProjection(clfs, "ChargedLeptons");
 
     // TODO
     // minimum pt cutoff?
-    MissingMomentum mmfs(FinalState(-4.2, 4.2, 0*GeV));
+    MissingMomentum mmfs(FinalState(-4.2, 4.2, 0.5*GeV));
     addProjection(mmfs, "MissingMomentum");
 
     FinalState fs;
@@ -96,18 +81,11 @@ void MC_BOOSTEDHBB::init() {
     caloParts.addVetoOnThisFinalState(leptonsAndNeutrinos);//Here we appear veto if we find a lepton  
 
     // track jets constituents
-		VetoedFinalState trackParts(ChargedFinalState(-2.5, 2.5, 0.5*GeV));
+		VetoedFinalState trackParts(ChargedFinalState(-2.5, 2.5, 5*GeV));
 		trackParts.addVetoOnThisFinalState(leptonsAndNeutrinos);
 
     // register jet collections
-//    addProjection(FastJets(trackParts, FastJets::ANTIKT, 0.3), "AntiKt03TrackJets");
-//    addProjection(FastJets(caloParts, FastJets::ANTIKT, 0.4), "AntiKt04CaloJets");
     addProjection(FastJets(caloParts, FastJets::ANTIKT, 1.0), "AntiKt10CaloJets"); //R=1 is rather wide so this should include two boosted higgs jets. We will be able to resolve these in the tracker. 
-
-    // variable-R jets. With the Calo.
-//    fastjet::JetDefinition::Plugin *vrplug =
- //       new fastjet::contrib::VariableRPlugin(60*GeV /* rho < mH */, 0.2, 0.6, fastjet::contrib::VariableRPlugin::AKTLIKE);
- //   addProjection(FastJets(caloParts, vrplug), "AntiKtVRCaloJets");//rho=60 GeV where R=rho/pt and minR=0.2 and maxR=0.6
 
     // variable-R jets. With the tracker.
     fastjet::JetDefinition::Plugin *vrPlugTrack =
@@ -115,14 +93,19 @@ void MC_BOOSTEDHBB::init() {
     addProjection(FastJets(trackParts, vrPlugTrack), "AntiKtVRTrackJets");//Here we add the projection and call it usign the string argument. 
 
 		//This is to look for the b hadrons. We do this to find the exact location of the b-Hadron relative to the centre of the jet.
-		addProjection(HeavyHadrons(-2.5,2.5,0.5*GeV), "HeavyHadrons");
+		addProjection(HeavyHadrons(-2.5,2.5,0.1*GeV), "HeavyHadrons");
 
     // register Z and W bosons
     bookFourMom("vboson");
 
     // register special collections
-    bookFourMom("higgs");
+    bookFourMom("BoostedHb");
+    bookFourMom("BoostedHbb");
     bookFourMomPair("vboson_higgs");
+    bookFourMomPair("BHadron-BTrackJet-1tag");
+    bookFourMomPair("vboson-boostedhiggs-1tag");
+    bookFourMomPair("vboson-boostedhiggs-2tags");
+    bookFourMomPair("BHadron-BTrackJet-2tag");
 
     cutflow = bookHisto1D("cutflow", CUTSLEN, 0, CUTSLEN, "cutflow", "cut", "entries");
 
@@ -135,48 +118,31 @@ void MC_BOOSTEDHBB::analyze(const Event& event) {
     const double weight = event.weight();
 
     // reset cut bits.
-    for (unsigned int iCut = 0; iCut < CUTSLEN; ++iCut)
-        cutBits[iCut] = false;
+    for (unsigned int iCut = 0; iCut < CUTSLEN; ++iCut){
+			cutBits[iCut] = false;
+		}
     cutBits[NONE] = true;
 
     // find a boson...
-    const Particles& zeebosons =
-        applyProjection<ZFinder>(event, "ZeeFinder").bosons();
-    const Particles& zmumubosons =
-        applyProjection<ZFinder>(event, "ZmumuFinder").bosons();
+    const Particles& zeebosons = applyProjection<ZFinder>(event, "ZeeFinder").bosons();
+    const Particles& zmumubosons = applyProjection<ZFinder>(event, "ZmumuFinder").bosons();
 
-    const Particles& wenubosons =
-        applyProjection<WFinder>(event, "WenuFinder").bosons();
-    const Particles& wmunubosons =
-        applyProjection<WFinder>(event, "WmunuFinder").bosons();
+    const Particles& wenubosons = applyProjection<WFinder>(event, "WenuFinder").bosons();
+    const Particles& wmunubosons =  applyProjection<WFinder>(event, "WmunuFinder").bosons();
 
     // leptons
     // TODO
     // isolation?
-    const Particles& leptons =
-        applyProjection<ChargedLeptons>(event, "ChargedLeptons").particles();
+    const Particles& leptons = applyProjection<ChargedLeptons>(event, "ChargedLeptons").particles();
 
-    const Particle& mm =
-        Particle(0, -applyProjection<MissingMomentum>(event, "MissingMomentum").visibleMomentum()); //Note the 4 vector momentum should sum to zero so if visible momentum is none zero is must be balanced in the opposite direction.
+    const Particle& mm = Particle(0, -applyProjection<MissingMomentum>(event, "MissingMomentum").visibleMomentum()); //Note the 4 vector momentum should sum to zero so if visible momentum is none zero is must be balanced in the opposite direction.
 
-//    const Jets& akt03tjs =
- //       applyProjection<FastJets>(event, "AntiKt03TrackJets").jetsByPt(25*GeV);//Look for jet over 25 GeV in the tracker. 
-//    const Jets& akt03tbjs = bTagged(akt03tjs);//Now from these jets the one which we have b tagged.
+		const Jets& akt10cjs = applyProjection<FastJets>(event, "AntiKt10CaloJets").jetsByPt(250*GeV);//Again find jets over 250 GeV in the calo.
 
-//    const Jets& akt04cjs =
- //       applyProjection<FastJets>(event, "AntiKt04CaloJets").jetsByPt(25*GeV);//Here we get the jets over 25 GeV from the calo.
-//    const Jets& akt04cbjs = bTagged(akt04cjs);
-
-    const Jets& akt10cjs =
-        applyProjection<FastJets>(event, "AntiKt10CaloJets").jetsByPt(250*GeV);//Again find jets over 250 GeV in the calo.
-
-//    const Jets& aktvrcjs =
-//        applyProjection<FastJets>(event, "AntiKtVRCaloJets").jetsByPt(25*GeV);//Now we use the variableR algorithm to search for jets in the calo. 
-//    const Jets& aktvrcbjs = bTagged(aktvrcjs);
-
-    const Jets& antiKtVRTrackJets =
-        applyProjection<FastJets>(event, "AntiKtVRTrackJets").jetsByPt(25*GeV);//Now we use the variableR algorithm to search for jets in the tracker. 
+    const Jets& antiKtVRTrackJets = applyProjection<FastJets>(event, "AntiKtVRTrackJets").jetsByPt(25*GeV);//Now we use the variableR algorithm to search for jets in the tracker. 
     const Jets& antiKtVRTrackJetsBTagged = bTagged(antiKtVRTrackJets);
+
+		const Particles& bhads = applyProjection<HeavyHadrons>(event, "HeavyHadrons").bHadrons();
 
     // find vboson
     Particle vboson;
@@ -186,7 +152,7 @@ void MC_BOOSTEDHBB::analyze(const Event& event) {
     } else if (zmumubosons.size() && leptons.size() == 2) {
         vboson = zmumubosons[0];
         cutBits[ZLL] = true;
-    } else if (wenubosons.size() && leptons.size() == 1) {//We look for a single W boson decaying into electron/muon and Neutrino. 
+    } else if (wenubosons.size() && leptons.size() == 1) {//We look for a single W boson decaying into electron/muon and neutrino. 
         vboson = wenubosons[0];
         cutBits[WLNU] = true;
     } else if (wmunubosons.size() && leptons.size() == 1) {
@@ -196,6 +162,17 @@ void MC_BOOSTEDHBB::analyze(const Event& event) {
         vboson = Particle(23, mm);
         cutBits[ZNUNU] = true;
     }
+    // find channel
+    string lepchan;
+    if (cutBits[ZLL]){
+			lepchan = "Zll";
+		}else if(cutBits[WLNU]){
+			lepchan = "Wlnu";
+		}else if (cutBits[ZNUNU]){
+			lepchan = "Znunu";
+		}else{
+			vetoEvent;
+		}
 
     cutBits[VBOSON] = cutBits[ZLL] || cutBits[WLNU] || cutBits[ZNUNU];
 
@@ -207,207 +184,95 @@ void MC_BOOSTEDHBB::analyze(const Event& event) {
     // exactly one akt10 calo jet
     // all track jets in event must be in the calo jet cone
 
-    if (akt10cjs.size()) //Look for at least 1 high energy=250 GeV jet in calo and large R=1 value
-			cutBits[ONEAKT10JETINC] = true;	
+    if (akt10cjs.size() == 1 ){ //Look for at least 1 high energy=250 GeV jet in calo and large R=1 value. Must be single large calo get or vetoEvent.
+			cutBits[ONEAKT10JET] = true;	
+		}else{
+			vetoEvent;
+		}
+		//Associate this energy deposit with the higgs.
+		boostedhiggs = Particle(25, akt10cjs.at(0).mom());
 
-    // exactly one akt10 calo jet
-/*    if (akt10cjs.size() == 1) {
-        cutBits[ONEAKT10JETEXC] = true;
-				//Now we look within the jet in the calo with high energy and R=1 into smaller jets in the tracker
-        cutBits[BOOSTEDHB] = akt03tbjs.size() == 1; //Now look for low energy single 25 GeV jet in the tracker with R=0.3. Which is b tagged.
-        cutBits[BOOSTEDHBB] = akt03tbjs.size() >= 2; //Same again but 2 tracks this time both b tagged.
+		//Now we have 1 large energy deposit in the calorimeter. Now try to match this with two jets in the tracker.  	
+		if(antiKtVRTrackJetsBTagged.size() > 2){
+			vetoEvent;
+		}
+		cutBits[ONEBTAGGEDTRACKJET] = antiKtVRTrackJetsBTagged.size() == 1; //Now look for low energy single 25 GeV jet in the tracker with VariableR. Which is b tagged.
+		cutBits[TWOBTAGGEDTRACKJET] = antiKtVRTrackJetsBTagged.size() == 2; //Same again but 2 tracks this time both b tagged.
 
-        boostedhiggs = Particle(25, akt10cjs[0].mom());
+		//Can we connect calo jet with track jets? If they are within a certain cut then we say we have associated the two different types of jet. Otherwise we assume they are different.
+		cutBits[ALLTRACKJETSCONNECTEDTOCALOJET] = true;//Set to true to begin with.
+		foreach (const Jet& tj, antiKtVRTrackJets) {
+			if (Rivet::deltaR(boostedhiggs, tj) > 10.0) { //DeltaR is the difference in pseudo rapidity and azimuthal angle between them. 
+				cutBits[ALLTRACKJETSCONNECTEDTOCALOJET] = false;
+				break;
+			}
+		}
 
-        // all track jets in event must be in the calo jet cone. If not then we assume we have not found higgs jets
-        foreach (const Jet& tj, akt03tjs) {
-            if (Rivet::deltaR(boostedhiggs, tj) > 1.0) { //DeltaR is the difference in pseudo rapidity and azimuthal angle between them. 
-                cutBits[BOOSTEDHB] = false;
-                cutBits[BOOSTEDHBB] = false;
-                break;
-            }
-        }
-    }*/
-		//Now look for VariableR track jets in association with a constant R=1 for the calo.
-    if (akt10cjs.size() == 1) {
-        cutBits[ONEAKT10JETEXC] = true;
-				//Now we look within the jet in the calo with high energy and R=1 into smaller jets in the tracker
-        cutBits[BOOSTEDHB] = antiKtVRTrackJetsBTagged.size() == 1; //Now look for low energy single 25 GeV jet in the tracker with VariableR. Which is b tagged.
-        cutBits[BOOSTEDHBB] = antiKtVRTrackJetsBTagged.size() >= 2; //Same again but 2 tracks this time both b tagged.
-
-        boostedhiggs = Particle(25, akt10cjs[0].mom());
-
-        // all track jets in event must be in the calo jet cone. If not then we assume we have not found higgs jets
-        foreach (const Jet& tj, antiKtVRTrackJets) {
-            if (Rivet::deltaR(boostedhiggs, tj) > 10.0) { //DeltaR is the difference in pseudo rapidity and azimuthal angle between them. 
-                cutBits[BOOSTEDHB] = false;
-                cutBits[BOOSTEDHBB] = false;
-                break;
-            }
-        }
-    }
-
-
-    // find resolved higgs
-//    Particle resolvedhiggs;
-
-  //  if (akt04cjs.size() >= 2) //Same again Energy=25 GeV but with larger R=0.4 constant. 
-    //    cutBits[TWOAKT04JETSINC] = true;
-
-    // very simple resolved higgs tagging
-    // exactly two akt04 calo jets, one of which must be b-tagged
- /*   if (akt04cjs.size() == 2) {
-        cutBits[TWOAKT04JETSEXC] = true;
-        cutBits[RESOLVEDHB] = akt04cbjs.size() == 1;
-        cutBits[RESOLVEDHBB] = akt04cbjs.size() == 2;
-
-        resolvedhiggs = Particle(25, akt04cjs[0].mom() + akt04cjs[1].mom());
-    }*/
-
-		//Look for higgs with VariableR algorithm in calo. 
-/*    Particle vrhiggs;
-    if (aktvrcjs.size() >= 2)
-        cutBits[TWOAKTVRJETSINC] = true; //Inclusive: More than 2 jets. 
-
-    if (aktvrcjs.size() == 2) { //If we have found two jets then add 4 vector together to get the variable Higgs. 
-        cutBits[TWOAKTVRJETSEXC] = true;
-        cutBits[VRHB] = aktvrcbjs.size() == 1;
-        cutBits[VRHBB] = aktvrcbjs.size() == 2;
-
-        vrhiggs = Particle(25, aktvrcjs[0].mom() + aktvrcjs[1].mom());
-    }
-		//This is the variableR algorithm in the tracker.
-    Particle vrHiggsTracker;
-    if (antiKtVRTrackJets.size() >= 2)
-        cutBits[TWOAKTVRJETSTRACKERINC] = true; //Exclusive: Only 2 jets.
-
-    if (antiKtVRTrackJets.size() == 2) { //If we have found two jets then add 4 vector together to get the variable Higgs. 
-        cutBits[TWOAKTVRJETSTRACKEREXC] = true;
-        cutBits[VRHBTRACKER] = antiKtVRTrackJetsBTagged.size() == 1;
-        cutBits[VRHBBTRACKER] = antiKtVRTrackJetsBTagged.size() == 2;
-
-				vrHiggsTracker = Particle(25, antiKtVRTrackJets[0].mom() +antiKtVRTrackJets[1].mom());
-    }
-*/
 		//Here we look for b hadrons. We look for b-hadron separate from the jet so we can determine the deltaR between the jet and B-hadron. Note should compare to the nearest jet.  
-		const Particles& bhads = applyProjection<HeavyHadrons>(event, "HeavyHadrons").bHadrons();
-    if (bhads.size()){
-			cutBits[BHADRONSFOUND] = true;
-		}
     if (bhads.size() == 1){
-			cutBits[BHADRONFOUNDSINGLE] = true;
+			cutBits[ONEBHADRONSFOUND] = true;
 		}
-		//Now associate Higgs information to lepton informtion in one set of truth bits. 
-    if (cutBits[ZLL]) {
-        cutBits[ZLLBOOSTEDHB] = cutBits[BOOSTEDHB];
-        cutBits[ZLLBOOSTEDHBB] = cutBits[BOOSTEDHBB];
-        cutBits[ZLLRESOLVEDHB] = cutBits[RESOLVEDHB];
-        cutBits[ZLLRESOLVEDHBB] = cutBits[RESOLVEDHBB];
-        cutBits[ZLLVRHB] = cutBits[VRHB];
-        cutBits[ZLLVRHBB] = cutBits[VRHBB];
-        cutBits[ZLLVRHBTRACKER] = cutBits[VRHBTRACKER];
-        cutBits[ZLLVRHBBTRACKER] = cutBits[VRHBBTRACKER];
-    } else if (cutBits[WLNU]) {
-        cutBits[WLNUBOOSTEDHB] = cutBits[BOOSTEDHB];
-        cutBits[WLNUBOOSTEDHBB] = cutBits[BOOSTEDHBB];
-        cutBits[WLNURESOLVEDHB] = cutBits[RESOLVEDHB];
-        cutBits[WLNURESOLVEDHBB] = cutBits[RESOLVEDHBB];
-        cutBits[WLNUVRHB] = cutBits[VRHB];
-        cutBits[WLNUVRHBB] = cutBits[VRHBB];
-        cutBits[WLNUVRHBTRACKER] = cutBits[VRHBTRACKER];
-        cutBits[WLNUVRHBBTRACKER] = cutBits[VRHBBTRACKER];
-
-    } else if (cutBits[ZNUNU]) {
-        cutBits[ZNUNUBOOSTEDHB] = cutBits[BOOSTEDHB];
-        cutBits[ZNUNUBOOSTEDHBB] = cutBits[BOOSTEDHBB];
-        cutBits[ZNUNURESOLVEDHB] = cutBits[RESOLVEDHB];
-        cutBits[ZNUNURESOLVEDHBB] = cutBits[RESOLVEDHBB];
-        cutBits[ZNUNUVRHB] = cutBits[VRHB];
-        cutBits[ZNUNUVRHBB] = cutBits[VRHBB];
-        cutBits[ZNUNUVRHBTRACKER] = cutBits[VRHBTRACKER];
-        cutBits[ZNUNUVRHBBTRACKER] = cutBits[VRHBBTRACKER];
-
-    }
+		else if (bhads.size() == 2){
+			cutBits[TWOBHADRONSFOUND] = true;
+		}else{//We veto the event if no b hadrons are found or if more than 2 are found
+			vetoEvent;
+		}
     // fill cuts.
-    for (int iCut = 0; iCut < CUTSLEN; ++iCut)
-        if (cutBits[iCut])
-            cutflow->fill(iCut, weight);
-
-
-    // find channel
-    string lepchan;
-    if (cutBits[ZLL])
-        lepchan = "Zll";
-    else if (cutBits[WLNU])
-        lepchan = "Wlnu";
-    else if (cutBits[ZNUNU])
-        lepchan = "Znunu";
-    else
-        vetoEvent;
-
-
+    for (int iCut = 0; iCut < CUTSLEN; ++iCut){
+			if (cutBits[iCut]){
+				cutflow->fill(iCut, weight);
+			}
+		}
     string channel;
-    Particle higgs;
-    if (cutBits[BOOSTEDHBB]) {
-        channel = lepchan + "BoostedHbb";
-        higgs = boostedhiggs;
-        fillFourMom(channel, "higgs", higgs.mom(), weight);
-        fillFourMom(channel, "vboson", vboson, weight);
-        fillFourMomPair(channel, "vboson_higgs", vboson.mom(), higgs.mom(), weight);
-    } else if (cutBits[BOOSTEDHB]) {
-        channel = lepchan + "BoostedHb";
-        higgs = boostedhiggs;
-        fillFourMom(channel, "higgs", higgs.mom(), weight);
-        fillFourMom(channel, "vboson", vboson, weight);
-        fillFourMomPair(channel, "vboson_higgs", vboson.mom(), higgs.mom(), weight);
-				if(cutBits[BHADRONSFOUND]){
-					fillFourMomPair(channel, "BHadron_TrackJet", bhads.at(0).mom(), antiKtVRTrackJetsBTagged.at(0).mom(), weight);//We assume only one b hadron since only 1 tagged jet. This might be a bad idea.
-				}
-    } 
-/*
-    if (cutBits[RESOLVEDHBB]) {
-        channel = lepchan + "ResolvedHbb";
-        higgs = resolvedhiggs;
-        fillFourMom(channel, "higgs", higgs.mom(), weight);
-        fillFourMom(channel, "vboson", vboson, weight);
-        fillFourMomPair(channel, "vboson_higgs", vboson.mom(), higgs.mom(), weight);
-    } else if (cutBits[RESOLVEDHB]) {
-        channel = lepchan + "ResolvedHb";
-        higgs = resolvedhiggs;
-        fillFourMom(channel, "higgs", higgs.mom(), weight);
-        fillFourMom(channel, "vboson", vboson, weight);
-        fillFourMomPair(channel, "vboson_higgs", vboson.mom(), higgs.mom(), weight);
+		//Now we want to determine the deltaR between the b-Hadron and the jet which has been b-tagged for a particular channel. It is not important to ensure that this is associated to calo since data should come from Higgs events.
+		//TO DO: Should we expect to see a difference between association with b-tagged jet and the nearest if we have two jets?
+		if(cutBits[ONEBHADRONSFOUND] and cutBits[ONEBTAGGEDTRACKJET]){
+			channel = lepchan + "BoostedHb";
+			fillFourMomPair(channel, "BHadron-BTrackJet-1tag", bhads.at(0).mom(), antiKtVRTrackJetsBTagged.at(0).mom(), weight);//We assume only one b hadron since only 1 tagged jet. This might be a bad idea.
+			//Do the same again but this time plot for all channels together.
+			fillFourMomPair("AllChannels", "BHadron-BTrackJet-1tag", bhads.at(0).mom(), antiKtVRTrackJetsBTagged.at(0).mom(), weight);//We assume only one b hadron since only 1 tagged jet. This might be a bad idea.
+		}
+		//This is used to determine the deltaR between the first hadron and it's closest jet. 
+		if(cutBits[TWOBHADRONSFOUND] and cutBits[TWOBTAGGEDTRACKJET]){
+			channel = lepchan + "BoostedHbb";
+			double dr1 = Rivet::deltaR(bhads.at(0).mom(),antiKtVRTrackJetsBTagged.at(0).mom());
+			double dr2 = Rivet::deltaR(bhads.at(0).mom(),antiKtVRTrackJetsBTagged.at(1).mom());
+			int trackPosition;
+			if(dr1 < dr2){ //So we want to match the first b-hadrons to it's closest jets.
+				trackPosition=0;	
+			}else{
+				trackPosition=1;
+			}
+			fillFourMomPair(channel, "BHadron-BTrackJet-2tag", bhads.at(0).mom(), antiKtVRTrackJetsBTagged.at(trackPosition).mom(), weight);
+			fillFourMomPair("AllChannels", "BHadron-BTrackJet-2tag", bhads.at(0).mom(), antiKtVRTrackJetsBTagged.at(trackPosition).mom(), weight);
+		}
+		//This is used to determine the deltaR between the second hadron and it's closest jet. 
+		if(cutBits[TWOBHADRONSFOUND] and cutBits[TWOBTAGGEDTRACKJET]){
+			channel = lepchan + "BoostedHbb";
+			double dr1 = Rivet::deltaR(bhads.at(1).mom(),antiKtVRTrackJetsBTagged.at(0).mom());
+			double dr2 = Rivet::deltaR(bhads.at(1).mom(),antiKtVRTrackJetsBTagged.at(1).mom());
+			int trackPosition;
+			if(dr1 < dr2){ //So we want to match the first b-hadrons to it's closest jets.
+				trackPosition=0;	
+			}else{
+				trackPosition=1;
+			}
+			fillFourMomPair(channel, "BHadron-BTrackJet-2tag", bhads.at(1).mom(), antiKtVRTrackJetsBTagged.at(trackPosition).mom(), weight);
+			fillFourMomPair("AllChannels", "BHadron-BTrackJet-2tag", bhads.at(1).mom(), antiKtVRTrackJetsBTagged.at(trackPosition).mom(), weight);
+		}
+		//If you have track jets with 1 or 2 b tags and associated with a calo jet then plot this as the boosted Higgs.
+    if (cutBits[TWOBTAGGEDTRACKJET]) {
+			channel = lepchan + "BoostedHbb";
+			fillFourMom(channel, "BoostedHbb", boostedhiggs.mom(), weight);
+			fillFourMom(channel, "vboson", vboson, weight);
+			fillFourMomPair(channel, "vboson-boostedhiggs-2tags", vboson.mom(), boostedhiggs.mom(), weight);
+    } else if (cutBits[ONEBTAGGEDTRACKJET]) {
+			channel = lepchan + "BoostedHb";
+			fillFourMom(channel, "BoostedHb", boostedhiggs.mom(), weight);
+			fillFourMom(channel, "vboson", vboson, weight);
+			fillFourMomPair(channel, "vboson-boostedhiggs-1tag", vboson.mom(), boostedhiggs.mom(), weight);
     } 
 
-    if (cutBits[VRHBB]) {
-        channel = lepchan + "VRHbb";
-        higgs = vrhiggs;
-        fillFourMom(channel, "higgs", higgs.mom(), weight);
-        fillFourMom(channel, "vboson", vboson, weight);
-        fillFourMomPair(channel, "vboson_higgs", vboson.mom(), higgs.mom(), weight);
-    } else if (cutBits[VRHB]) {
-        channel = lepchan + "VRHb";
-        higgs = vrhiggs;
-        fillFourMom(channel, "higgs", higgs.mom(), weight);
-        fillFourMom(channel, "vboson", vboson, weight);
-        fillFourMomPair(channel, "vboson_higgs", vboson.mom(), higgs.mom(), weight);
-    } 
-		
-		//This is addition of jet search with variableR algorithm in tracker.
-		if (cutBits[VRHBBTRACKER]) {
-        channel = lepchan + "VRTrackerHbb";
-        higgs = vrHiggsTracker;
-      //  fillFourMom(channel, "higgs", higgs.mom(), weight); //This does not seem to work even for vboson
-				fillFourMom(channel, "vboson", vboson, weight);
-      //  fillFourMomPair(channel, "vboson_higgs", vboson.mom(), higgs.mom(), weight);
-    } else if (cutBits[VRHBTRACKER]) {
-        channel = lepchan + "VRTrackerHb";
-        higgs = vrHiggsTracker;
-      //  fillFourMom(channel, "higgs", higgs.mom(), weight);
-   //     fillFourMom(channel, "vboson", vboson, weight);
-      //  fillFourMomPair(channel, "vboson_higgs", vboson.mom(), higgs.mom(), weight);
-    } 
-*/
 
     return;
 }
@@ -504,12 +369,17 @@ void MC_BOOSTEDHBB::bookFourMomPair(const string& name) {
 
     foreach (const string& chan, channels) {
         // extra histograms for pairs of particles
-        histos1D[chan][name]["dr"] = bookHisto(chan + "_" + name + "_dr", drlab, "", 25, 0, 5);
+        histos1D[chan][name]["dr"] = bookHisto(chan + "_" + name + "_dr", drlab, "", 50, 0, 2);
 
-        histos2D[chan][name]["dr_vs_pt"] = bookHisto(chan + "_" + name + "_dr_vs_pt", name,
+        histos2D[chan][name]["dr_vs_ptTotal"] = bookHisto(chan + "_" + name + "_dr_vs_ptTotal", name,
                 ptlab, 25, 0, 2000*GeV,
                 drlab, 25, 0, 5);
-
+        histos2D[chan][name]["dr_vs_ptBHad"] = bookHisto(chan + "_" + name + "_dr_vs_ptBHad", name,
+                ptlab, 25, 0, 2000*GeV,
+                drlab, 25, 0, 5);
+        histos2D[chan][name]["dr_vs_ptTrackJet"] = bookHisto(chan + "_" + name + "_dr_vs_ptTrackJet", name,
+                ptlab, 25, 0, 2000*GeV,
+                drlab, 25, 0, 5);
         histos2D[chan][name]["pt1_vs_pt2"] = bookHisto(chan + "_" + name + "_pt1_vs_pt2", name,
                 ptlab, 25, 0, 2000*GeV,
                 ptlab, 25, 0, 2000*GeV);
@@ -579,7 +449,9 @@ void MC_BOOSTEDHBB::fillFourMomPair(const string& channel, const string& name, c
     double pt = (p1 + p2).pT();
 
     histos1D[channel][name]["dr"]->fill(dr, weight);
-    histos2D[channel][name]["dr_vs_pt"]->fill(pt, dr);
+    histos2D[channel][name]["dr_vs_ptTotal"]->fill(pt, dr);
+    histos2D[channel][name]["dr_vs_ptBHad"]->fill(p1.pT(), dr);
+    histos2D[channel][name]["dr_vs_ptTrackJet"]->fill(p2.pT(), dr);
     histos2D[channel][name]["pt1_vs_pt2"]->fill(p2.pT(), p1.pT());
     histos1D[channel][name]["pt1_minus_pt2"]->fill(p1.pT() - p2.pT());
 

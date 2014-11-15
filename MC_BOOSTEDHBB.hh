@@ -35,49 +35,13 @@ namespace Rivet {
                 ZNUNU,              // 2
                 ZLL,                // 3
                 VBOSON,             // 4
-                TWOAKT04JETSINC,    // 5
-                TWOAKT04JETSEXC,    // 6
-                RESOLVEDHB,         // 7
-                RESOLVEDHBB,        // 8
-                WLNURESOLVEDHB,     // 9
-                WLNURESOLVEDHBB,    // 10
-                ZNUNURESOLVEDHB,    // 11
-                ZNUNURESOLVEDHBB,   // 12
-                ZLLRESOLVEDHB,      // 13
-                ZLLRESOLVEDHBB,     // 14
-                ONEAKT10JETINC,     // 15
-                ONEAKT10JETEXC,     // 16
-                BOOSTEDHB,          // 17
-                BOOSTEDHBB,         // 18
-                WLNUBOOSTEDHB,      // 19
-                WLNUBOOSTEDHBB,     // 20
-                ZNUNUBOOSTEDHB,     // 21
-                ZNUNUBOOSTEDHBB,    // 22
-                ZLLBOOSTEDHB,       // 23
-                ZLLBOOSTEDHBB,      // 24
-								BHADRONSFOUND,
-								BHADRONFOUNDSINGLE,
-                TWOAKTVRJETSINC,
-                TWOAKTVRJETSEXC,
-                TWOAKTVRJETSTRACKERINC,
-                TWOAKTVRJETSTRACKEREXC,
-                VRHB,
-                VRHBB,
-                VRHBTRACKER,
-                VRHBBTRACKER,
-                WLNUVRHB,
-                WLNUVRHBB,
-                WLNUVRHBTRACKER,
-                WLNUVRHBBTRACKER,
-                ZNUNUVRHB,
-                ZNUNUVRHBB,
-                ZNUNUVRHBTRACKER,
-                ZNUNUVRHBBTRACKER,
-                ZLLVRHB,
-                ZLLVRHBB,
-                ZLLVRHBTRACKER,
-                ZLLVRHBBTRACKER,
-                CUTSLEN
+                ONEAKT10JET,        // 5
+                ONEBTAGGEDTRACKJET, // 6
+							  TWOBTAGGEDTRACKJET, // 7
+								ALLTRACKJETSCONNECTEDTOCALOJET, //8
+								ONEBHADRONSFOUND,   // 9
+								TWOBHADRONSFOUND,    // 10
+                CUTSLEN             //This is used to keep the size of this enum automatically.
             };
 
             vector<bool> cutBits;
