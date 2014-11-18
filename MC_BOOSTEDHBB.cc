@@ -43,14 +43,14 @@ namespace Rivet {
 /// Book histograms and initialise projections before the run
 void MC_BOOSTEDHBB::init() {
     bookChannel("AllChannels");
-    bookChannel("ZllBoostedHbb");
-    bookChannel("ZllBoostedHb");
-
-    bookChannel("WlnuBoostedHbb");
-    bookChannel("WlnuBoostedHb");
-
-    bookChannel("ZnunuBoostedHbb");
-    bookChannel("ZnunuBoostedHb");
+//    bookChannel("ZllBoostedHbb");
+//    bookChannel("ZllBoostedHb");
+//
+//    bookChannel("WlnuBoostedHbb");
+//    bookChannel("WlnuBoostedHb");
+//
+//    bookChannel("ZnunuBoostedHbb");
+//    bookChannel("ZnunuBoostedHb");
 
     ChargedLeptons clfs(FinalState(-2.5, 2.5, 25*GeV));
     addProjection(clfs, "ChargedLeptons");
@@ -96,15 +96,15 @@ void MC_BOOSTEDHBB::init() {
 		addProjection(HeavyHadrons(-2.5,2.5,0.1*GeV), "HeavyHadrons");
 
     // register Z and W bosons
-    bookFourMom("vboson");
+//    bookFourMom("vboson");
 
     // register special collections
-    bookFourMom("BoostedHb");
-    bookFourMom("BoostedHbb");
-    bookFourMomPair("vboson_higgs");
+//    bookFourMom("BoostedHb");
+//    bookFourMom("BoostedHbb");
+//    bookFourMomPair("vboson_higgs");
     bookFourMomPair("BHadron-BTrackJet-1tag");
-    bookFourMomPair("vboson-boostedhiggs-1tag");
-    bookFourMomPair("vboson-boostedhiggs-2tags");
+//    bookFourMomPair("vboson-boostedhiggs-1tag");
+//    bookFourMomPair("vboson-boostedhiggs-2tags");
     bookFourMomPair("BHadron-BTrackJet-2tag");
 
     cutflow = bookHisto1D("cutflow", CUTSLEN, 0, CUTSLEN, "cutflow", "cut", "entries");
@@ -228,9 +228,9 @@ void MC_BOOSTEDHBB::analyze(const Event& event) {
 		//TO DO: Should we expect to see a difference between association with b-tagged jet and the nearest if we have two jets?
 		if(cutBits[ONEBHADRONSFOUND] and cutBits[ONEBTAGGEDTRACKJET]){
 			channel = lepchan + "BoostedHb";
-			fillFourMomPair(channel, "BHadron-BTrackJet-1tag", bhads.at(0).mom(), antiKtVRTrackJetsBTagged.at(0).mom(), weight);//We assume only one b hadron since only 1 tagged jet. This might be a bad idea.
-			//Do the same again but this time plot for all channels together.
-			fillFourMomPair("AllChannels", "BHadron-BTrackJet-1tag", bhads.at(0).mom(), antiKtVRTrackJetsBTagged.at(0).mom(), weight);//We assume only one b hadron since only 1 tagged jet. This might be a bad idea.
+//			fillFourMomPair(channel, "BHadron-BTrackJet-1tag", bhads.at(0).mom(), antiKtVRTrackJetsBTagged.at(0).mom(), weight);
+//			//Do the same again but this time plot for all channels together.
+			fillFourMomPair("AllChannels", "BHadron-BTrackJet-1tag", bhads.at(0).mom(), antiKtVRTrackJetsBTagged.at(0).mom(), weight);
 		}
 		//This is used to determine the deltaR between the first hadron and it's closest jet. 
 		if(cutBits[TWOBHADRONSFOUND] and cutBits[TWOBTAGGEDTRACKJET]){
@@ -243,7 +243,7 @@ void MC_BOOSTEDHBB::analyze(const Event& event) {
 			}else{
 				trackPosition=1;
 			}
-			fillFourMomPair(channel, "BHadron-BTrackJet-2tag", bhads.at(0).mom(), antiKtVRTrackJetsBTagged.at(trackPosition).mom(), weight);
+//			fillFourMomPair(channel, "BHadron-BTrackJet-2tag", bhads.at(0).mom(), antiKtVRTrackJetsBTagged.at(trackPosition).mom(), weight);
 			fillFourMomPair("AllChannels", "BHadron-BTrackJet-2tag", bhads.at(0).mom(), antiKtVRTrackJetsBTagged.at(trackPosition).mom(), weight);
 		}
 		//This is used to determine the deltaR between the second hadron and it's closest jet. 
@@ -257,21 +257,21 @@ void MC_BOOSTEDHBB::analyze(const Event& event) {
 			}else{
 				trackPosition=1;
 			}
-			fillFourMomPair(channel, "BHadron-BTrackJet-2tag", bhads.at(1).mom(), antiKtVRTrackJetsBTagged.at(trackPosition).mom(), weight);
+//			fillFourMomPair(channel, "BHadron-BTrackJet-2tag", bhads.at(1).mom(), antiKtVRTrackJetsBTagged.at(trackPosition).mom(), weight);
 			fillFourMomPair("AllChannels", "BHadron-BTrackJet-2tag", bhads.at(1).mom(), antiKtVRTrackJetsBTagged.at(trackPosition).mom(), weight);
 		}
 		//If you have track jets with 1 or 2 b tags and associated with a calo jet then plot this as the boosted Higgs.
-    if (cutBits[TWOBTAGGEDTRACKJET]) {
-			channel = lepchan + "BoostedHbb";
-			fillFourMom(channel, "BoostedHbb", boostedhiggs.mom(), weight);
-			fillFourMom(channel, "vboson", vboson, weight);
-			fillFourMomPair(channel, "vboson-boostedhiggs-2tags", vboson.mom(), boostedhiggs.mom(), weight);
-    } else if (cutBits[ONEBTAGGEDTRACKJET]) {
-			channel = lepchan + "BoostedHb";
-			fillFourMom(channel, "BoostedHb", boostedhiggs.mom(), weight);
-			fillFourMom(channel, "vboson", vboson, weight);
-			fillFourMomPair(channel, "vboson-boostedhiggs-1tag", vboson.mom(), boostedhiggs.mom(), weight);
-    } 
+//    if (cutBits[TWOBTAGGEDTRACKJET]) {
+//			channel = lepchan + "BoostedHbb";
+//			fillFourMom(channel, "BoostedHbb", boostedhiggs.mom(), weight);
+//			fillFourMom(channel, "vboson", vboson, weight);
+//			fillFourMomPair(channel, "vboson-boostedhiggs-2tags", vboson.mom(), boostedhiggs.mom(), weight);
+//    } else if (cutBits[ONEBTAGGEDTRACKJET]) {
+//			channel = lepchan + "BoostedHb";
+//			fillFourMom(channel, "BoostedHb", boostedhiggs.mom(), weight);
+//			fillFourMom(channel, "vboson", vboson, weight);
+//			fillFourMomPair(channel, "vboson-boostedhiggs-1tag", vboson.mom(), boostedhiggs.mom(), weight);
+ //   } 
 
 
     return;
@@ -349,15 +349,15 @@ Histo2DPtr MC_BOOSTEDHBB::bookHisto(const string& name, const string& title,
 void MC_BOOSTEDHBB::bookFourMom(const string& name) {
     MSG_DEBUG("Booking " << name << " histograms.");
 
-    foreach (const string& chan, channels) {
-        histos1D[chan][name]["pt"] = bookHisto(chan + "_" + name + "_pt", name, ptlab, 25, 0, 2000*GeV);
-        histos1D[chan][name]["eta"] = bookHisto(chan + "_" + name + "_eta", name, "$\\eta$", 25, -5, 5);
-        histos1D[chan][name]["m"] = bookHisto(chan + "_" + name + "_m", name, mlab, 25, 0, 1000*GeV);
+//    foreach (const string& chan, channels) {
+//        histos1D[chan][name]["pt"] = bookHisto(chan + "_" + name + "_pt", name, ptlab, 25, 0, 2000*GeV);
+//        histos1D[chan][name]["eta"] = bookHisto(chan + "_" + name + "_eta", name, "$\\eta$", 25, -5, 5);
+//        histos1D[chan][name]["m"] = bookHisto(chan + "_" + name + "_m", name, mlab, 25, 0, 1000*GeV);
 
-        histos2D[chan][name]["m_vs_pt"] = bookHisto(chan + "_" + name + "_m_vs_pt", name,
-                ptlab, 25, 0, 2000*GeV,
-                mlab, 25, 0, 1000*GeV);
-    }
+//        histos2D[chan][name]["m_vs_pt"] = bookHisto(chan + "_" + name + "_m_vs_pt", name,
+  //              ptlab, 25, 0, 2000*GeV,
+  //              mlab, 25, 0, 1000*GeV);
+//    }
 
     return;
 }
@@ -369,24 +369,24 @@ void MC_BOOSTEDHBB::bookFourMomPair(const string& name) {
 
     foreach (const string& chan, channels) {
         // extra histograms for pairs of particles
-        histos1D[chan][name]["dr"] = bookHisto(chan + "_" + name + "_dr", drlab, "", 50, 0, 2);
+     //   histos1D[chan][name]["dr"] = bookHisto(chan + "_" + name + "_dr", drlab, "", 50, 0, 2);
 
-        histos2D[chan][name]["dr_vs_ptTotal"] = bookHisto(chan + "_" + name + "_dr_vs_ptTotal", name,
-                ptlab, 25, 0, 2000*GeV,
-                drlab, 25, 0, 5);
+   //     histos2D[chan][name]["dr_vs_ptTotal"] = bookHisto(chan + "_" + name + "_dr_vs_ptTotal", name,
+   //             ptlab, 25, 0, 2000*GeV,
+    //            drlab, 25, 0, 5);
         histos2D[chan][name]["dr_vs_ptBHad"] = bookHisto(chan + "_" + name + "_dr_vs_ptBHad", name,
                 ptlab, 25, 0, 2000*GeV,
                 drlab, 25, 0, 5);
         histos2D[chan][name]["dr_vs_ptTrackJet"] = bookHisto(chan + "_" + name + "_dr_vs_ptTrackJet", name,
                 ptlab, 25, 0, 2000*GeV,
                 drlab, 25, 0, 5);
-        histos2D[chan][name]["pt1_vs_pt2"] = bookHisto(chan + "_" + name + "_pt1_vs_pt2", name,
-                ptlab, 25, 0, 2000*GeV,
-                ptlab, 25, 0, 2000*GeV);
+   //     histos2D[chan][name]["pt1_vs_pt2"] = bookHisto(chan + "_" + name + "_pt1_vs_pt2", name,
+     //           ptlab, 25, 0, 2000*GeV,
+      //          ptlab, 25, 0, 2000*GeV);
 
         // pt balance
-        histos1D[chan][name]["pt1_minus_pt2"] = bookHisto(chan + "_" + name + "_pt1_minus_pt2", name,
-                ptlab, 25, -1000*GeV, 1000*GeV);
+   //     histos1D[chan][name]["pt1_minus_pt2"] = bookHisto(chan + "_" + name + "_pt1_minus_pt2", name,
+    //            ptlab, 25, -1000*GeV, 1000*GeV);
     }
 
     return;
@@ -395,23 +395,23 @@ void MC_BOOSTEDHBB::bookFourMomPair(const string& name) {
 
 void MC_BOOSTEDHBB::bookFourMomComp(const string& name) {
 
-    foreach (const string& chan, channels) {
-        histos1D[chan][name]["dr"] = bookHisto(chan + "_" + name + "_dr", drlab, name, 25, 0, 0.5);
+  //  foreach (const string& chan, channels) {
+//        histos1D[chan][name]["dr"] = bookHisto(chan + "_" + name + "_dr", drlab, name, 25, 0, 0.5);
 
-        histos1D[chan][name]["pt1_minus_pt2"] = bookHisto(chan + "_" + name + "_pt1_minus_pt2", name,
-                ptlab, 25, -100*GeV, 100*GeV);
+  //      histos1D[chan][name]["pt1_minus_pt2"] = bookHisto(chan + "_" + name + "_pt1_minus_pt2", name,
+   //             ptlab, 25, -100*GeV, 100*GeV);
 
-        histos1D[chan][name]["pt1_by_pt2"] = bookHisto(chan + "_" + name + "_pt1_by_pt2", name,
-                "$p_{T,1}/p_{T,2}$" , 25, 0, 3);
+    //    histos1D[chan][name]["pt1_by_pt2"] = bookHisto(chan + "_" + name + "_pt1_by_pt2", name,
+     //           "$p_{T,1}/p_{T,2}$" , 25, 0, 3);
 
-        histos2D[chan][name]["dr_vs_dpt"] = bookHisto(chan + "_" + name + "_dr_vs_dpt", name,
-                ptlab, 25, -100*GeV, 100*GeV,
-                drlab, 25, 0, 0.5);
+   //     histos2D[chan][name]["dr_vs_dpt"] = bookHisto(chan + "_" + name + "_dr_vs_dpt", name,
+     //           ptlab, 25, -100*GeV, 100*GeV,
+      //          drlab, 25, 0, 0.5);
 
-        histos2D[chan][name]["pt1_vs_pt2"] = bookHisto(chan + "_" + name + "_pt1_vs_pt2", name,
-                ptlab, 25, 0, 2000*GeV,
-                ptlab, 25, 0, 2000*GeV);
-    }
+   //     histos2D[chan][name]["pt1_vs_pt2"] = bookHisto(chan + "_" + name + "_pt1_vs_pt2", name,
+    //            ptlab, 25, 0, 2000*GeV,
+     //           ptlab, 25, 0, 2000*GeV);
+//    }
 
     return;
 }
@@ -423,8 +423,8 @@ void MC_BOOSTEDHBB::bookFourMomColl(const string& name) {
     // bookFourMom(name + "0");
     // bookFourMom(name + "1");
 
-    foreach (const string& chan, channels)
-        histos1D[chan][name]["n"] = bookHisto(chan + "_" + name + "_n", "multiplicity", "", 10, 0, 10);
+//    foreach (const string& chan, channels)
+ //       histos1D[chan][name]["n"] = bookHisto(chan + "_" + name + "_n", "multiplicity", "", 10, 0, 10);
 
     return;
 }
@@ -433,10 +433,10 @@ void MC_BOOSTEDHBB::bookFourMomColl(const string& name) {
 void MC_BOOSTEDHBB::fillFourMom(const string& channel, const string& name, const FourMomentum& p, double weight) {
     MSG_DEBUG("Filling " << name << " histograms");
 
-    histos1D[channel][name]["pt"]->fill(p.pT(), weight);
-    histos1D[channel][name]["eta"]->fill(p.eta(), weight);
-    histos1D[channel][name]["m"]->fill(p.mass(), weight);
-    histos2D[channel][name]["m_vs_pt"]->fill(p.pT(), p.mass(), weight);
+//    histos1D[channel][name]["pt"]->fill(p.pT(), weight);
+//    histos1D[channel][name]["eta"]->fill(p.eta(), weight);
+//    histos1D[channel][name]["m"]->fill(p.mass(), weight);
+//    histos2D[channel][name]["m_vs_pt"]->fill(p.pT(), p.mass(), weight);
 
     return;
 }
@@ -448,12 +448,12 @@ void MC_BOOSTEDHBB::fillFourMomPair(const string& channel, const string& name, c
     double dr = Rivet::deltaR(p1, p2);
     double pt = (p1 + p2).pT();
 
-    histos1D[channel][name]["dr"]->fill(dr, weight);
-    histos2D[channel][name]["dr_vs_ptTotal"]->fill(pt, dr);
+//    histos1D[channel][name]["dr"]->fill(dr, weight);
+//    histos2D[channel][name]["dr_vs_ptTotal"]->fill(pt, dr);
     histos2D[channel][name]["dr_vs_ptBHad"]->fill(p1.pT(), dr);
     histos2D[channel][name]["dr_vs_ptTrackJet"]->fill(p2.pT(), dr);
-    histos2D[channel][name]["pt1_vs_pt2"]->fill(p2.pT(), p1.pT());
-    histos1D[channel][name]["pt1_minus_pt2"]->fill(p1.pT() - p2.pT());
+//    histos2D[channel][name]["pt1_vs_pt2"]->fill(p2.pT(), p1.pT());
+//    histos1D[channel][name]["pt1_minus_pt2"]->fill(p1.pT() - p2.pT());
 
     return;
 }
@@ -461,13 +461,13 @@ void MC_BOOSTEDHBB::fillFourMomPair(const string& channel, const string& name, c
 
 void MC_BOOSTEDHBB::fillFourMomComp(const string& channel, const string& name, const FourMomentum& p1, const FourMomentum& p2, double weight) {
 
-    double dr = Rivet::deltaR(p1, p2);
+//    double dr = Rivet::deltaR(p1, p2);
 
-    histos1D[channel][name]["dr"]->fill(dr, weight);
-    histos1D[channel][name]["pt1_minus_pt2"]->fill(p1.pT() - p2.pT());
-    histos1D[channel][name]["pt1_by_pt2"]->fill(p1.pT() / p2.pT());
-    histos2D[channel][name]["dr_vs_dpt"]->fill(p1.pT() - p2.pT(), dr, weight);
-    histos2D[channel][name]["pt1_vs_pt2"]->fill(p2.pT(), p1.pT());
+//    histos1D[channel][name]["dr"]->fill(dr, weight);
+ //   histos1D[channel][name]["pt1_minus_pt2"]->fill(p1.pT() - p2.pT());
+  //  histos1D[channel][name]["pt1_by_pt2"]->fill(p1.pT() / p2.pT());
+   // histos2D[channel][name]["dr_vs_dpt"]->fill(p1.pT() - p2.pT(), dr, weight);
+  //  histos2D[channel][name]["pt1_vs_pt2"]->fill(p2.pT(), p1.pT());
 
     return;
 }
@@ -477,10 +477,10 @@ template <class T>
 void MC_BOOSTEDHBB::fillFourMomColl(const string& channel, const string& name, const vector<T>& ps, double weight) {
 
     MSG_DEBUG("Filling " << ps.size() << " members of collection " << name);
-    histos1D[channel][name]["n"]->fill(ps.size(), weight);
+//    histos1D[channel][name]["n"]->fill(ps.size(), weight);
 
-    foreach (const T& p, ps)
-        fillFourMom(channel, name, p.mom(), weight);
+ //   foreach (const T& p, ps)
+   //     fillFourMom(channel, name, p.mom(), weight);
 
     return;
 }
