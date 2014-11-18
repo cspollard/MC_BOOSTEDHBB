@@ -36,11 +36,15 @@ namespace Rivet {
                 ZLL,                // 3
                 VBOSON,             // 4
                 ONEAKT10JET,        // 5
-                ONEBTAGGEDTRACKJET, // 6
-							  TWOBTAGGEDTRACKJET, // 7
-								ALLTRACKJETSCONNECTEDTOCALOJET, //8
-								ONEBHADRONSFOUND,   // 9
-								TWOBHADRONSFOUND,    // 10
+                ONEBTAGGEDTRACKJETRHO30, // 6
+							  TWOBTAGGEDTRACKJETRHO30, // 7
+                ONEBTAGGEDTRACKJETRHO60, // 8
+							  TWOBTAGGEDTRACKJETRHO60, // 9
+                ONEBTAGGEDTRACKJETRHO120, // 10
+							  TWOBTAGGEDTRACKJETRHO120, // 11
+								ALLTRACKJETSCONNECTEDTOCALOJET, //12
+								ONEBHADRONSFOUND,   // 13
+								TWOBHADRONSFOUND,    // 14
                 CUTSLEN             //This is used to keep the size of this enum automatically.
             };
 
