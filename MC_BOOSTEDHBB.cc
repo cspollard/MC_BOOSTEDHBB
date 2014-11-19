@@ -89,11 +89,15 @@ void MC_BOOSTEDHBB::init() {
 		//Now book histograms to plot
     bookFourMomPair("BHadron-BTrackJet-1tagRho30");
     bookFourMomPair("BHadron-BTrackJet-2tagRho30");
+    bookFourMomPair("BHadron-BTrackJet-Rho30");
+
     bookFourMomPair("BHadron-BTrackJet-1tagRho60");
     bookFourMomPair("BHadron-BTrackJet-2tagRho60");
+    bookFourMomPair("BHadron-BTrackJet-Rho60");
+
     bookFourMomPair("BHadron-BTrackJet-1tagRho120");
     bookFourMomPair("BHadron-BTrackJet-2tagRho120");
-
+    bookFourMomPair("BHadron-BTrackJet-Rho120");
 
     cutflow = bookHisto1D("cutflow", CUTSLEN, 0, CUTSLEN, "cutflow", "cut", "entries");
 
@@ -197,6 +201,7 @@ void MC_BOOSTEDHBB::analyze(const Event& event) {
 		//Now we want to determine the deltaR between the b-Hadron and the jet which has been b-tagged for a particular channel. It is not important to ensure that this is associated to calo since data should come from Higgs events.
 		//We plot first for the small Rho=30 then all others. 
 		if(cutBits[ONEBHADRONSFOUND] and cutBits[ONEBTAGGEDTRACKJETRHO30]){
+			fillFourMomPair("AllChannels", "BHadron-BTrackJet-Rho30", bhads.at(0).mom(), antiKtVRTrackJetsBTaggedRho30.at(0).mom(), weight);
 			fillFourMomPair("AllChannels", "BHadron-BTrackJet-1tagRho30", bhads.at(0).mom(), antiKtVRTrackJetsBTaggedRho30.at(0).mom(), weight);
 		}
 		//This is used to determine the deltaR between the first hadron and it's closest jet. 
@@ -209,6 +214,7 @@ void MC_BOOSTEDHBB::analyze(const Event& event) {
 			}else{
 				trackPosition=1;
 			}
+			fillFourMomPair("AllChannels", "BHadron-BTrackJet-Rho30", bhads.at(0).mom(), antiKtVRTrackJetsBTaggedRho30.at(trackPosition).mom(), weight);
 			fillFourMomPair("AllChannels", "BHadron-BTrackJet-2tagRho30", bhads.at(0).mom(), antiKtVRTrackJetsBTaggedRho30.at(trackPosition).mom(), weight);
 		}
 		//This is used to determine the deltaR between the second hadron and it's closest jet. 
@@ -221,12 +227,14 @@ void MC_BOOSTEDHBB::analyze(const Event& event) {
 			}else{
 				trackPosition=1;
 			}
+			fillFourMomPair("AllChannels", "BHadron-BTrackJet-Rho30", bhads.at(1).mom(), antiKtVRTrackJetsBTaggedRho30.at(trackPosition).mom(), weight);
 			fillFourMomPair("AllChannels", "BHadron-BTrackJet-2tagRho30", bhads.at(1).mom(), antiKtVRTrackJetsBTaggedRho30.at(trackPosition).mom(), weight);
 		}
 
 
 
 		if(cutBits[ONEBHADRONSFOUND] and cutBits[ONEBTAGGEDTRACKJETRHO60]){
+			fillFourMomPair("AllChannels", "BHadron-BTrackJet-Rho60", bhads.at(0).mom(), antiKtVRTrackJetsBTaggedRho60.at(0).mom(), weight);
 			fillFourMomPair("AllChannels", "BHadron-BTrackJet-1tagRho60", bhads.at(0).mom(), antiKtVRTrackJetsBTaggedRho60.at(0).mom(), weight);
 		}
 		//This is used to determine the deltaR between the first hadron and it's closest jet. 
@@ -239,6 +247,7 @@ void MC_BOOSTEDHBB::analyze(const Event& event) {
 			}else{
 				trackPosition=1;
 			}
+			fillFourMomPair("AllChannels", "BHadron-BTrackJet-Rho60", bhads.at(0).mom(), antiKtVRTrackJetsBTaggedRho60.at(trackPosition).mom(), weight);
 			fillFourMomPair("AllChannels", "BHadron-BTrackJet-2tagRho60", bhads.at(0).mom(), antiKtVRTrackJetsBTaggedRho60.at(trackPosition).mom(), weight);
 		}
 		//This is used to determine the deltaR between the second hadron and it's closest jet. 
@@ -251,10 +260,12 @@ void MC_BOOSTEDHBB::analyze(const Event& event) {
 			}else{
 				trackPosition=1;
 			}
+			fillFourMomPair("AllChannels", "BHadron-BTrackJet-Rho60", bhads.at(1).mom(), antiKtVRTrackJetsBTaggedRho60.at(trackPosition).mom(), weight);
 			fillFourMomPair("AllChannels", "BHadron-BTrackJet-2tagRho60", bhads.at(1).mom(), antiKtVRTrackJetsBTaggedRho60.at(trackPosition).mom(), weight);
 		}
 
 		if(cutBits[ONEBHADRONSFOUND] and cutBits[ONEBTAGGEDTRACKJETRHO120]){
+			fillFourMomPair("AllChannels", "BHadron-BTrackJet-Rho120", bhads.at(0).mom(), antiKtVRTrackJetsBTaggedRho120.at(0).mom(), weight);
 			fillFourMomPair("AllChannels", "BHadron-BTrackJet-1tagRho120", bhads.at(0).mom(), antiKtVRTrackJetsBTaggedRho120.at(0).mom(), weight);
 		}
 		//This is used to determine the deltaR between the first hadron and it's closest jet. 
@@ -267,6 +278,7 @@ void MC_BOOSTEDHBB::analyze(const Event& event) {
 			}else{
 				trackPosition=1;
 			}
+			fillFourMomPair("AllChannels", "BHadron-BTrackJet-Rho120", bhads.at(0).mom(), antiKtVRTrackJetsBTaggedRho120.at(trackPosition).mom(), weight);
 			fillFourMomPair("AllChannels", "BHadron-BTrackJet-2tagRho120", bhads.at(0).mom(), antiKtVRTrackJetsBTaggedRho120.at(trackPosition).mom(), weight);
 		}
 		//This is used to determine the deltaR between the second hadron and it's closest jet. 
@@ -279,6 +291,7 @@ void MC_BOOSTEDHBB::analyze(const Event& event) {
 			}else{
 				trackPosition=1;
 			}
+			fillFourMomPair("AllChannels", "BHadron-BTrackJet-Rho120", bhads.at(1).mom(), antiKtVRTrackJetsBTaggedRho120.at(trackPosition).mom(), weight);
 			fillFourMomPair("AllChannels", "BHadron-BTrackJet-2tagRho120", bhads.at(1).mom(), antiKtVRTrackJetsBTaggedRho120.at(trackPosition).mom(), weight);
 		}
 
@@ -377,11 +390,11 @@ void MC_BOOSTEDHBB::bookFourMomPair(const string& name) {
 
     foreach (const string& chan, channels) {
         histos2D[chan][name]["dr_vs_ptBHad"] = bookHisto(chan + "_" + name + "_dr_vs_ptBHad", name,
-                ptlab, 25, 0, 2000*GeV,
-                drlab, 25, 0, 5);
+                ptlab, 25, 1, 600*GeV,
+                drlab, 100, 0.001, 0.1);
         histos2D[chan][name]["dr_vs_ptTrackJet"] = bookHisto(chan + "_" + name + "_dr_vs_ptTrackJet", name,
-                ptlab, 25, 0, 2000*GeV,
-                drlab, 25, 0, 5);
+                ptlab, 25, 1, 600*GeV,
+                drlab, 100, 0.001, 0.1);
     }
 
     return;
