@@ -54,6 +54,8 @@ namespace Rivet {
             vector<string> channels;
             map<string, map<string, map<string, Histo1DPtr> > > histos1D;
             map<string, map<string, map<string, Histo2DPtr> > > histos2D;
+            map<string, map<string, map<string, Profile1DPtr> > > profile1D;
+
 
             void bookChannel(const string& channel);
 
@@ -63,6 +65,9 @@ namespace Rivet {
             Histo2DPtr bookHisto(const string& name, const string& title,
                     const string& xlabel, int nxbins, double xmin, double xmax,
                     const string& ylabel, int nybins, double ymin, double ymax);
+
+						Profile1DPtr bookProfile(const string& name, const string& title, const string& xlabel, int nxbins, double xmin, double xmax);
+
 
             void bookFourMom(const string& name);
             void bookFourMomPair(const string& name);
