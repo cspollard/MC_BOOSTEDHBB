@@ -10,11 +10,7 @@ namespace Rivet {
         public:
             /// Constructor
             MC_BOOSTEDHBB()
-                : Analysis("MC_BOOSTEDHBB"),
-                    cutBits(CUTSLEN, false) {
-
-                    return;
-                }
+                : Analysis("MC_BOOSTEDHBB") { }
 
             /// Book histograms and initialise projections before the run
             void init();
@@ -27,34 +23,10 @@ namespace Rivet {
 
         private:
 
-
-            Histo1DPtr cutflow;
-            enum cuts {
-                NONE,               // 0
-                WLNU,               // 1
-                ZNUNU,              // 2
-                ZLL,                // 3
-                VBOSON,             // 4
-                ONEAKT10JET,        // 5
-                ONEBTAGGEDTRACKJETRHO30, // 6
-							  TWOBTAGGEDTRACKJETRHO30, // 7
-                ONEBTAGGEDTRACKJETRHO60, // 8
-							  TWOBTAGGEDTRACKJETRHO60, // 9
-                ONEBTAGGEDTRACKJETRHO120, // 10
-							  TWOBTAGGEDTRACKJETRHO120, // 11
-								ALLTRACKJETSCONNECTEDTOCALOJET, //12
-								ONEBHADRONSFOUND,   // 13
-								TWOBHADRONSFOUND,    // 14
-                CUTSLEN             //This is used to keep the size of this enum automatically.
-            };
-
-            vector<bool> cutBits;
-
-
             vector<string> channels;
             map<string, map<string, map<string, Histo1DPtr> > > histos1D;
             map<string, map<string, map<string, Histo2DPtr> > > histos2D;
-            map<string, map<string, map<string, Profile1DPtr> > > profile1D;
+            map<string, map<string, map<string, Profile1DPtr> > > profiles1D;
 
 
             void bookChannel(const string& channel);
@@ -66,12 +38,14 @@ namespace Rivet {
                     const string& xlabel, int nxbins, double xmin, double xmax,
                     const string& ylabel, int nybins, double ymin, double ymax);
 
-						Profile1DPtr bookProfile(const string& name, const string& title, const string& xlabel, int nxbins, double xmin, double xmax);
+            Profile1DPtr bookProfile(const string& name, const string& title,
+                    const string& xlabel, int nxbins, double xmin, double xmax,
+                    const string& ylabel);
 
 
             void bookFourMom(const string& name);
-            void bookFourMomPair(const string& name);
-            void bookFourMomComp(const string& name);
+            void bookFourMomPair(const string& name1, const string& name2);
+            void bookFourMomComp(const string& name, const string& name2);
             void bookFourMomColl(const string& name);
 
             void fillFourMom(const string& channel,
@@ -80,14 +54,16 @@ namespace Rivet {
                     double weight);
 
             void fillFourMomPair(const string& channel,
-                    const string& name,
+                    const string& name1,
                     const FourMomentum& p1,
+                    const string& name2,
                     const FourMomentum& p2,
                     double weight);
 
             void fillFourMomComp(const string& channel,
-                    const string& name,
+                    const string& name1,
                     const FourMomentum& p1,
+                    const string& name2,
                     const FourMomentum& p2,
                     double weight);
 
@@ -99,6 +75,10 @@ namespace Rivet {
 
 
             Jets bTagged(const Jets& js);
+
+            void fillBHadHists(const Event& event,
+                    const Particle& bhad,
+                    const vector<string>& jetColls);
     };
 
 
