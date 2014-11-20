@@ -398,17 +398,10 @@ void MC_BOOSTEDHBB::bookFourMomPair(const string& name) {
 //    bookFourMom(name); Do not need to plot all this information.
 
     foreach (const string& chan, channels) {
-        histos2D[chan][name]["dr_vs_ptBHad"] = bookHisto(chan + "_" + name + "_dr_vs_ptBHad", name,
-                ptlab, 25, 0, 600*GeV,
-                drlab, 100, 0, 0.05);
-        histos2D[chan][name]["dr_vs_ptTrackJet"] = bookHisto(chan + "_" + name + "_dr_vs_ptTrackJet", name,
-                ptlab, 25, 0, 600*GeV,
-                drlab, 100, 0, 0.05);
         profile1D[chan][name]["dr_vs_ptBHad"] = bookProfile(chan + "_" + name + "_dr_vs_ptBHad_Profile", name,
                 ptlab, 25, 0, 600*GeV);
         profile1D[chan][name]["dr_vs_ptTrackJet"] = bookProfile(chan + "_" + name + "_dr_vs_ptTrackJet_Profile", name,
                 ptlab, 25, 0, 600*GeV);
-        histos2D[chan][name]["pt1_vs_pt2"] = bookHisto(chan + "_" + name + "_pt1_vs_pt2", name, ptlab, 25, 0, 600*GeV,ptlab, 25, 0, 600*GeV);
     }
 
     return;
@@ -455,11 +448,8 @@ void MC_BOOSTEDHBB::fillFourMomPair(const string& channel, const string& name, c
 
     double dr = Rivet::deltaR(p1, p2);
 
-    histos2D[channel][name]["dr_vs_ptBHad"]->fill(p1.pT(), dr);
-    histos2D[channel][name]["dr_vs_ptTrackJet"]->fill(p2.pT(), dr);
     profile1D[channel][name]["dr_vs_ptBHad"]->fill(p1.pT(), dr);
 		profile1D[channel][name]["dr_vs_ptTrackJet"]->fill(p2.pT(), dr);
-		histos2D[channel][name]["pt1_vs_pt2"]->fill(p2.pT(), p1.pT());
     return;
 }
 
