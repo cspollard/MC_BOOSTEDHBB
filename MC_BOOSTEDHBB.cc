@@ -40,11 +40,15 @@ namespace Rivet {
 
     int drMinJetIdx(const Particle& p, const Jets& jets) {
 
-        double drmin = 99999999;
-        unsigned int drminidx = -1;
+        double dr;
+        double drmin = -1;
+        int drminidx = -1;
         for (unsigned int iJet = 0; iJet < jets.size(); iJet++) {
-            if (Rivet::deltaR(p.mom(), jets.at(iJet).mom()) < drmin)
+            dr = Rivet::deltaR(p.mom(), jets[iJet].mom());
+            if (dr < drmin || drminidx < 0) {
+                drmin = dr;
                 drminidx = iJet;
+            }
         }
 
         return drminidx;
@@ -263,7 +267,7 @@ namespace Rivet {
 
             // dr and dpt
             histos1D[chan][label]["dr"] =
-                bookHisto(chan + "_" + label + "_dr", drlab, label, 25, 0, 0.5);
+                bookHisto(chan + "_" + label + "_dr", drlab, label, 40, 0, 4.0);
 
             histos1D[chan][label]["dpt"] =
                 bookHisto(chan + "_" + label + "_dpt", label,
@@ -325,7 +329,7 @@ namespace Rivet {
             n = "mean_" + label + "_dpt_vs_dr";
             profiles1D[chan][label][n] =
                 bookProfile(chan + "_" + n, label,
-                        "$\\Delta R(" + label1 + "," + label2 + "}$", 25, -0.5, 0.5,
+                        "$\\Delta R(" + label1 + "," + label2 + "}$", 40, 0, 4.0,
                         "\\left< $p_{T," + label1 + "}  - p_{T," + label2 + "} / GeV$ \\right>");
 
 
@@ -334,7 +338,7 @@ namespace Rivet {
             histos2D[chan][label]["dr_vs_dpt"] =
                 bookHisto(chan + "_" + label + "_dr_vs_dpt", label,
                         ptlab, 25, -100*GeV, 100*GeV,
-                        drlab, 25, 0, 0.5);
+                        drlab, 40, 0, 4.0);
 
             // (pti, ptj)
             n = label1 + "_pt_vs_" + label2 + "_pt";
@@ -403,6 +407,16 @@ namespace Rivet {
         double pt1 = p1.pT();
         double pt2 = p2.pT();
         double dpt = pt1 - pt2;
+
+        if (dr > 0.4) {
+            cout << endl
+                << "dr: " << dr << endl
+                << "pt1: " << pt1 << endl
+                << "pt2: " << pt2 << endl
+                << "dpt: " << dpt << endl
+                << endl;
+        }
+
 
         histos1D[channel][label]["dr"]->fill(dr, weight);
         histos1D[channel][label]["dpt"]->fill(dpt, weight);
