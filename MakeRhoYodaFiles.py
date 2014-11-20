@@ -20,11 +20,6 @@ yfiledict = {}
 
 findrho = re.compile(r"_Rho([0-9]*)_")
 for k, ao in aodict.iteritems():
-    # TODO
-    # should be unnecessary soon
-    k = k.replace('-', '_')
-    ao.path = ao.path.replace('-', '_')
-
     m = findrho.search(k)
     if m:
         rho = int(m.group(1))

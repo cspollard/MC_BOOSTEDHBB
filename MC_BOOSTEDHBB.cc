@@ -32,9 +32,9 @@ using namespace Rivet::Cuts;
 // global variables. ick
 const string ptlab = "$p_T$ / GeV";
 const string mlab = "mass / GeV";
-const string drlab = "$\\Delta R";
-const string etalab = "$\\eta";
-const string philab = "$\\phi";
+const string drlab = "$\\Delta R$";
+const string etalab = "$\\eta$";
+const string philab = "$\\phi$";
 namespace Rivet {
 
 /// @name Analysis methods
@@ -61,7 +61,7 @@ void MC_BOOSTEDHBB::init() {
 		trackParts.addVetoOnThisFinalState(leptonsAndNeutrinos);
 
     // variable-R jets. With the tracker.
-    fastjet::JetDefinition::Plugin *vrPlugTrackRho60 = new fastjet::contrib::VariableRPlugin(60*GeV /* rho < mH */, 0.01, 2.0, fastjet::contrib::VariableRPlugin::AKTLIKE);//Here we create specify the jet definition 
+    fastjet::JetDefinition::Plugin *vrPlugTrackRho60 = new fastjet::contrib::VariableRPlugin(60*GeV /* rho < mH */, 0.001, 2.0, fastjet::contrib::VariableRPlugin::AKTLIKE);//Here we create specify the jet definition 
     addProjection(FastJets(trackParts, vrPlugTrackRho60), "AntiKtVRTrackJetsRho60");//Here we add the projection and call it using the string argument. 
 
     fastjet::JetDefinition::Plugin *vrPlugTrackRho30 = new fastjet::contrib::VariableRPlugin(30*GeV /* rho < mH */, 0.001, 2.0, fastjet::contrib::VariableRPlugin::AKTLIKE);//We do the same again but this time with a Rho=30 
@@ -404,11 +404,11 @@ void MC_BOOSTEDHBB::bookFourMomPair(const string& name) {
         histos2D[chan][name]["dr_vs_ptTrackJet"] = bookHisto(chan + "_" + name + "_dr_vs_ptTrackJet", name,
                 ptlab, 25, 0, 600*GeV,
                 drlab, 100, 0, 0.05);
-        profile1D[chan][name]["dr_vs_ptBHad"] = bookProfile(chan + "_" + name + "_dr_vs_ptBHad", name,
+        profile1D[chan][name]["dr_vs_ptBHad"] = bookProfile(chan + "_" + name + "_dr_vs_ptBHad_Profile", name,
                 ptlab, 25, 0, 600*GeV);
-        profile1D[chan][name]["dr_vs_ptTrackJet"] = bookProfile(chan + "_" + name + "_dr_vs_ptTrackJet", name,
+        profile1D[chan][name]["dr_vs_ptTrackJet"] = bookProfile(chan + "_" + name + "_dr_vs_ptTrackJet_Profile", name,
                 ptlab, 25, 0, 600*GeV);
-        histos2D[chan][name]["pt1_vs_pt2"] = bookHisto(chan + "_" + name + "_pt1_vs_pt2", name, ptlab, 25, 0, 2000*GeV,ptlab, 25, 0, 2000*GeV);
+        histos2D[chan][name]["pt1_vs_pt2"] = bookHisto(chan + "_" + name + "_pt1_vs_pt2", name, ptlab, 25, 0, 600*GeV,ptlab, 25, 0, 600*GeV);
     }
 
     return;
