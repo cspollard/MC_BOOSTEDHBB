@@ -18,23 +18,24 @@ aodict = yoda.core.read(args[0], True)
 
 yfiledict = {}
 
-findrho = re.compile(r"_Rho([0-9]*)_")
-for k, ao in aodict.iteritems():
-    m = findrho.search(k)
-    if m:
-        rho = int(m.group(1))
-    else:
-        continue
+label = re.compile(r"Rho[0-9]*Min[0-9]*Max[0-9]*_|AKT[0-9]*_")
 
-    # replace "_RhoXXX_" with "_"
-    ao.path = findrho.sub("_", ao.path)
-    if rho in yfiledict:
-        yfiledict[rho].append(ao)
+for k, ao in aodict.iteritems():
+    print k
+    m = label.search(k)
+    print m
+    if m:
+        lab = m.group(0)[:-1]
+    else: continue
+
+    ao.path = label.sub("", ao.path)
+    if lab in yfiledict:
+        yfiledict[lab].append(ao)
     else:
-        yfiledict[rho] = [ao]
+        yfiledict[lab] = [ao]
 
     continue
 
 # loop over rho, aos
-for rho, aos in yfiledict.iteritems():
-    yoda.write(aos, "Rho%03d.yoda" % rho)
+for lab, aos in yfiledict.iteritems():
+    yoda.write(aos, "%s.yoda" % lab)

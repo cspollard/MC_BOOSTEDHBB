@@ -38,7 +38,7 @@ namespace Rivet {
     }
 
 
-    unsigned int drMinJetIdx(const Particle& p, const Jets& jets) {
+    int drMinJetIdx(const Particle& p, const Jets& jets) {
 
         double drmin = 99999999;
         unsigned int drminidx = -1;
@@ -397,7 +397,7 @@ namespace Rivet {
     void MC_BOOSTEDHBB::fillBHadHists(const Event& event,
             const Particle& bhad, const vector<string>& jetColls) {
 
-        unsigned int jidx;
+        int jidx;
         double weight = event.weight();
 
         foreach (const string& jetColl, jetColls) {
@@ -406,9 +406,12 @@ namespace Rivet {
                 applyProjection<FastJets>(event, jetColl).jetsByPt(25*GeV);
 
             jidx = drMinJetIdx(bhad, jets);
-            fillFourMomComp(jetColl, "BHad", bhad,
-                    "TrackJet", jets[jidx],
-                    weight);
+
+            if (jidx >= 0) {
+                fillFourMomComp(jetColl, "BHad", bhad,
+                        "TrackJet", jets[jidx],
+                        weight);
+            }
 
         }
 
