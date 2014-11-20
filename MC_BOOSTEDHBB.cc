@@ -32,9 +32,9 @@ using namespace Rivet::Cuts;
 // global variables. ick
 const string ptlab = "$p_T$ / GeV";
 const string mlab = "mass / GeV";
-const string drlab = "$\\Delta R";
-const string etalab = "$\\eta";
-const string philab = "$\\phi";
+const string drlab = "$\\Delta R$";
+const string etalab = "$\\eta$";
+const string philab = "$\\phi$";
 
 namespace Rivet {
 
