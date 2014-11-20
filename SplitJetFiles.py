@@ -21,9 +21,7 @@ yfiledict = {}
 label = re.compile(r"Rho[0-9]*Min[0-9]*Max[0-9]*_|AKT[0-9]*_")
 
 for k, ao in aodict.iteritems():
-    print k
     m = label.search(k)
-    print m
     if m:
         lab = m.group(0)[:-1]
     else: continue

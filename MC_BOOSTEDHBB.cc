@@ -261,6 +261,7 @@ namespace Rivet {
         string n;
         foreach (const string& chan, channels) {
 
+            // dr and dpt
             histos1D[chan][label]["dr"] =
                 bookHisto(chan + "_" + label + "_dr", drlab, label, 25, 0, 0.5);
 
@@ -268,6 +269,8 @@ namespace Rivet {
                 bookHisto(chan + "_" + label + "_dpt", label,
                         ptlab, 25, -100*GeV, 100*GeV);
 
+
+            // <pti> vs ptj
             n = "mean_" + label1 + "_pt_vs_" + label2 + "_pt";
             profiles1D[chan][label][n] =
                 bookProfile(chan + "_" + n, label,
@@ -280,11 +283,60 @@ namespace Rivet {
                         "$p_{T," + label1 + "} / GeV$", 25, 0, 500*GeV,
                         "$\\left< p_{T," + label2 + "} \\right>$");
 
+
+            // <dpt> vs pti
+            n = "mean_" + label + "_dpt_vs_" + label1 + "_pt";
+            profiles1D[chan][label][n] =
+                bookProfile(chan + "_" + n, label,
+                        "$p_{T," + label1 + "} / GeV$", 25, 0, 500*GeV,
+                        "$\\left< p_{T," + label1 + "} - p_{T," + label2 + "} \\right>$");
+
+            n = "mean_" + label + "_dpt_vs_" + label2 + "_pt";
+            profiles1D[chan][label][n] =
+                bookProfile(chan + "_" + n, label,
+                        "$p_{T," + label2 + "} / GeV$", 25, 0, 500*GeV,
+                        "$\\left< p_{T," + label1 + "} - p_{T," + label2 + "} \\right>$");
+
+
+
+            // <dr> vs pti
+            n = "mean_" + label + "_dr_vs_" + label1 + "_pt";
+            profiles1D[chan][label][n] =
+                bookProfile(chan + "_" + n, label,
+                        "$p_{T," + label1 + "} / GeV$", 25, 0, 500*GeV,
+                        "$\\left< \\Delta R(" + label1 + "," + label2 + "} \\right>$");
+
+            n = "mean_" + label + "_dr_vs_" + label2 + "_pt";
+            profiles1D[chan][label][n] =
+                bookProfile(chan + "_" + n, label,
+                        "$p_{T," + label2 + "} / GeV$", 25, 0, 500*GeV,
+                        "$\\left< \\Delta R(" + label1 + "," + label2 + "} \\right>$");
+
+
+            // <dr> vs dpt
+            n = "mean_" + label + "_dr_vs_dpt";
+            profiles1D[chan][label][n] =
+                bookProfile(chan + "_" + n, label,
+                        "$p_{T," + label1 + "}  - p_{T," + label2 + "} / GeV$", 25, -100*GeV, 100*GeV,
+                        "$\\left< \\Delta R(" + label1 + "," + label2 + "} \\right>$");
+
+
+            // <dpt> vs dr
+            n = "mean_" + label + "_dpt_vs_dr";
+            profiles1D[chan][label][n] =
+                bookProfile(chan + "_" + n, label,
+                        "$\\Delta R(" + label1 + "," + label2 + "}$", 25, -0.5, 0.5,
+                        "\\left< $p_{T," + label1 + "}  - p_{T," + label2 + "} / GeV$ \\right>");
+
+
+
+            // (dr, dpt)
             histos2D[chan][label]["dr_vs_dpt"] =
                 bookHisto(chan + "_" + label + "_dr_vs_dpt", label,
                         ptlab, 25, -100*GeV, 100*GeV,
                         drlab, 25, 0, 0.5);
 
+            // (pti, ptj)
             n = label1 + "_pt_vs_" + label2 + "_pt";
             histos2D[chan][label][n] = bookHisto(chan + "_" + n, label,
                     ptlab, 25, 0, 500*GeV,
@@ -348,21 +400,41 @@ namespace Rivet {
         const string label = label1 + "_" + label2;
 
         double dr = Rivet::deltaR(p1, p2);
-        double dpt = p1.pT() - p2.pT();
+        double pt1 = p1.pT();
+        double pt2 = p2.pT();
+        double dpt = pt1 - pt2;
 
         histos1D[channel][label]["dr"]->fill(dr, weight);
         histos1D[channel][label]["dpt"]->fill(dpt, weight);
 
         string n = "mean_" + label1 + "_pt_vs_" + label2 + "_pt";
-        profiles1D[channel][label][n]->fill(p2.pT(), p1.pT(), weight);
+        profiles1D[channel][label][n]->fill(pt2, pt1, weight);
 
         n = "mean_" + label2 + "_pt_vs_" + label1 + "_pt";
-        profiles1D[channel][label][n]->fill(p1.pT(), p2.pT(), weight);
+        profiles1D[channel][label][n]->fill(pt1, pt2, weight);
 
-        histos2D[channel][label]["dr_vs_dpt"]->fill(p1.pT() - p2.pT(), dr, weight);
+        n = "mean_" + label + "_dpt_vs_" + label1 + "_pt";
+        profiles1D[channel][label][n]->fill(pt1, dpt, weight);
+
+        n = "mean_" + label + "_dpt_vs_" + label2 + "_pt";
+        profiles1D[channel][label][n]->fill(pt2, dpt, weight);
+
+        n = "mean_" + label + "_dr_vs_" + label1 + "_pt";
+        profiles1D[channel][label][n]->fill(pt1, dr, weight);
+
+        n = "mean_" + label + "_dr_vs_" + label2 + "_pt";
+        profiles1D[channel][label][n]->fill(pt2, dr, weight);
+
+        n = "mean_" + label + "_dr_vs_dpt";
+        profiles1D[channel][label][n]->fill(dpt, dr, weight);
+
+        n = "mean_" + label + "_dpt_vs_dr";
+        profiles1D[channel][label][n]->fill(dr, dpt, weight);
+
+        histos2D[channel][label]["dr_vs_dpt"]->fill(dpt, dr, weight);
 
         n = label1 + "_pt_vs_" + label2 + "_pt";
-        histos2D[channel][label][n]->fill(p2.pT(), p1.pT());
+        histos2D[channel][label][n]->fill(pt2, pt1);
 
         return;
     }
