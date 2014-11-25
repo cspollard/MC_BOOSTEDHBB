@@ -67,13 +67,13 @@ namespace Rivet {
         bookChannel("Rho50Min00Max10");
         bookChannel("Rho60Min00Max10");
 
-        bookChannel("AKT01");
-        bookChannel("AKT02");
-        bookChannel("AKT03");
-        bookChannel("AKT04");
-        bookChannel("AKT05");
-        bookChannel("AKT06");
+        bookChannel("AKTTrack02");
+        bookChannel("AKTTrack03");
+        bookChannel("AKTTrack04");
+        bookChannel("AKTCalo04");
 
+        // calo jets constituents
+        FinalState caloParts(-2.5, 2.5, 0.5*GeV);
 
         // track jets constituents
         ChargedFinalState trackParts(-2.5, 2.5, 0.5*GeV);
@@ -95,12 +95,11 @@ namespace Rivet {
 
 
         // conventional jet projections
-        addProjection(FastJets(trackParts, FastJets::ANTIKT, 0.1), "AKT01");
-        addProjection(FastJets(trackParts, FastJets::ANTIKT, 0.2), "AKT02");
-        addProjection(FastJets(trackParts, FastJets::ANTIKT, 0.3), "AKT03");
-        addProjection(FastJets(trackParts, FastJets::ANTIKT, 0.4), "AKT04");
-        addProjection(FastJets(trackParts, FastJets::ANTIKT, 0.5), "AKT05");
-        addProjection(FastJets(trackParts, FastJets::ANTIKT, 0.6), "AKT06");
+        addProjection(FastJets(trackParts, FastJets::ANTIKT, 0.2), "AKTTrack02");
+        addProjection(FastJets(trackParts, FastJets::ANTIKT, 0.3), "AKTTrack03");
+        addProjection(FastJets(trackParts, FastJets::ANTIKT, 0.4), "AKTTrack04");
+
+        addProjection(FastJets(caloParts, FastJets::ANTIKT, 0.4), "AKTCalo04");
 
 
         // projection to find b-hadrons
