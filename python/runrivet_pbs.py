@@ -37,7 +37,7 @@ def runrivet_pbs(fhepmcnames):
 
 def main(args):
     if len(argv) < 2:
-        print "no hepmc output specified"
+        print "no hepmc input specified"
         exit()
 
     runrivet_pbs(args[1:])
