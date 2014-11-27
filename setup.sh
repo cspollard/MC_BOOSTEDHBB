@@ -1,2 +1,2 @@
-export PYTHONPATH=$PYTHONPATH:`pwd -P`/python/
-export PATH=$PATH:`pwd -P`/python/
+export PYTHONPATH=`pwd -P`/python/:$PYTHONPATH
+export PATH=`pwd -P`/python/:$PATH
