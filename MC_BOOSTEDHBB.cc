@@ -60,6 +60,7 @@ namespace Rivet {
     /// Book histograms and initialise projections before the run
     void MC_BOOSTEDHBB::init() {
 
+        bookChannel("Rho05Min00Max10");
         bookChannel("Rho10Min00Max10");
         bookChannel("Rho20Min00Max10");
         bookChannel("Rho30Min00Max10");
@@ -72,6 +73,7 @@ namespace Rivet {
         bookChannel("AKTTrack04");
         bookChannel("AKTCalo04");
 
+
         // calo jets constituents
         FinalState caloParts(-2.5, 2.5, 0.5*GeV);
 
@@ -80,6 +82,8 @@ namespace Rivet {
 
 
         // variable-R jet projections
+        addProjection(FastJets(trackParts, aktVRPlugin(5*GeV, 0, 1)),
+                "Rho05Min00Max10");
         addProjection(FastJets(trackParts, aktVRPlugin(10*GeV, 0, 1)),
                 "Rho10Min00Max10");
         addProjection(FastJets(trackParts, aktVRPlugin(20*GeV, 0, 1)),
@@ -108,6 +112,10 @@ namespace Rivet {
         //Now book histograms to plot
         bookFourMomComp("DRBHad", "Jet");
         bookFourMomComp("GABHad", "Jet");
+        bookFourMom("DRBHad");
+        bookFourMom("DRBHadJet");
+        bookFourMom("GABHad");
+        bookFourMom("GABHadJet");
 
         return;
     }
@@ -489,6 +497,8 @@ namespace Rivet {
             if (jidx >= 0) {
                 fillFourMomComp(jetColl, "DRBHad", bhad,
                         "Jet", jets[jidx], weight);
+                fillFourMom(jetColl, "DRBHad", bhad, weight);
+                fillFourMom(jetColl, "DRBHadJet", jets[jidx], weight);
             }
 
         }
@@ -511,7 +521,8 @@ namespace Rivet {
                 foreach (const Particle& bhad, jet.bTags()) {
                     fillFourMomComp(jetColl, "GABHad", bhad,
                             "Jet", jet, weight);
-
+                    fillFourMom(jetColl, "GABHad", bhad, weight);
+                    fillFourMom(jetColl, "GABHadJet", jet, weight);
                 }
             }
 
