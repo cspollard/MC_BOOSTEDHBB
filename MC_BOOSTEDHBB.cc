@@ -106,7 +106,8 @@ namespace Rivet {
         addProjection(HeavyHadrons(-2.5, 2.5, 5*GeV), "HeavyHadrons");
 
         //Now book histograms to plot
-        bookFourMomComp("BHad", "TrackJet");
+        bookFourMomComp("DRBHad", "Jet");
+        bookFourMomComp("GABHad", "Jet");
 
         return;
     }
@@ -120,8 +121,11 @@ namespace Rivet {
         if (!bhads.size())
             vetoEvent;
 
+
+        fillGABHadHists(event, channels);
+
         foreach (const Particle& bhad, bhads)
-            fillBHadHists(event, bhad, channels);
+            fillDRBHadHists(event, bhad, channels);
 
 
         return;
@@ -479,7 +483,7 @@ namespace Rivet {
     }
 
 
-    void MC_BOOSTEDHBB::fillBHadHists(const Event& event,
+    void MC_BOOSTEDHBB::fillDRBHadHists(const Event& event,
             const Particle& bhad, const vector<string>& jetColls) {
 
         int jidx;
@@ -493,15 +497,39 @@ namespace Rivet {
             jidx = drMinJetIdx(bhad, jets);
 
             if (jidx >= 0) {
-                fillFourMomComp(jetColl, "BHad", bhad,
-                        "TrackJet", jets[jidx],
-                        weight);
+                fillFourMomComp(jetColl, "DRBHad", bhad,
+                        "Jet", jets[jidx], weight);
             }
 
         }
 
         return;
     }
+
+
+    void MC_BOOSTEDHBB::fillGABHadHists(const Event& event,
+            const vector<string>& jetColls) {
+
+        double weight = event.weight();
+
+        foreach (const string& jetColl, jetColls) {
+
+            const Jets& jets =
+                applyProjection<FastJets>(event, jetColl).jetsByPt(25*GeV);
+
+            foreach (const Jet& jet, jets) {
+                foreach (const Particle& bhad, jet.bTags()) {
+                    fillFourMomComp(jetColl, "GABHad", bhad,
+                            "Jet", jet, weight);
+
+                }
+            }
+
+        }
+
+        return;
+    }
+
 
 
     //@}

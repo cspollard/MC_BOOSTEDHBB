@@ -76,8 +76,11 @@ namespace Rivet {
 
             Jets bTagged(const Jets& js);
 
-            void fillBHadHists(const Event& event,
+            void fillDRBHadHists(const Event& event,
                     const Particle& bhad,
+                    const vector<string>& jetColls);
+
+            void fillGABHadHists(const Event& event,
                     const vector<string>& jetColls);
     };
 
