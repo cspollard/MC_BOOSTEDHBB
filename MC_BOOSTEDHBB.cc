@@ -411,16 +411,6 @@ namespace Rivet {
         double pt2 = p2.pT();
         double dpt = pt1 - pt2;
 
-        if (dr > 0.4) {
-            cout << endl
-                << "dr: " << dr << endl
-                << "pt1: " << pt1 << endl
-                << "pt2: " << pt2 << endl
-                << "dpt: " << dpt << endl
-                << endl;
-        }
-
-
         histos1D[channel][label]["dr"]->fill(dr, weight);
         histos1D[channel][label]["dpt"]->fill(dpt, weight);
 
