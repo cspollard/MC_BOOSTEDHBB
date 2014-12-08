@@ -64,9 +64,16 @@ namespace Rivet {
         bookChannel("Rho10Min00Max10");
         bookChannel("Rho20Min00Max10");
         bookChannel("Rho30Min00Max10");
-        bookChannel("Rho40Min00Max10");
-        bookChannel("Rho50Min00Max10");
-        bookChannel("Rho60Min00Max10");
+
+        bookChannel("Rho05Min005Max10");
+        bookChannel("Rho10Min005Max10");
+        bookChannel("Rho20Min005Max10");
+        bookChannel("Rho30Min005Max10");
+
+        bookChannel("Rho05Min01Max10");
+        bookChannel("Rho10Min01Max10");
+        bookChannel("Rho20Min01Max10");
+        bookChannel("Rho30Min01Max10");
 
         bookChannel("AKTTrack02");
         bookChannel("AKTTrack03");
@@ -90,12 +97,24 @@ namespace Rivet {
                 "Rho20Min00Max10");
         addProjection(FastJets(trackParts, aktVRPlugin(30*GeV, 0, 1)),
                 "Rho30Min00Max10");
-        addProjection(FastJets(trackParts, aktVRPlugin(40*GeV, 0, 1)),
-                "Rho40Min00Max10");
-        addProjection(FastJets(trackParts, aktVRPlugin(50*GeV, 0, 1)),
-                "Rho50Min00Max10");
-        addProjection(FastJets(trackParts, aktVRPlugin(60*GeV, 0, 1)),
-                "Rho60Min00Max10");
+
+        addProjection(FastJets(trackParts, aktVRPlugin(5*GeV, 0.05, 1)),
+                "Rho05Min005Max10");
+        addProjection(FastJets(trackParts, aktVRPlugin(10*GeV, 0.05, 1)),
+                "Rho10Min005Max10");
+        addProjection(FastJets(trackParts, aktVRPlugin(20*GeV, 0.05, 1)),
+                "Rho20Min005Max10");
+        addProjection(FastJets(trackParts, aktVRPlugin(30*GeV, 0.05, 1)),
+                "Rho30Min005Max10");
+
+        addProjection(FastJets(trackParts, aktVRPlugin(5*GeV, 0.1, 1)),
+                "Rho05Min01Max10");
+        addProjection(FastJets(trackParts, aktVRPlugin(10*GeV, 0.1, 1)),
+                "Rho10Min01Max10");
+        addProjection(FastJets(trackParts, aktVRPlugin(20*GeV, 0.1, 1)),
+                "Rho20Min01Max10");
+        addProjection(FastJets(trackParts, aktVRPlugin(30*GeV, 0.1, 1)),
+                "Rho30Min01Max10");
 
 
         // conventional jet projections
