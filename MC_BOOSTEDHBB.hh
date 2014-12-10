@@ -25,6 +25,7 @@ namespace Rivet {
 
             vector<string> channels;
             map<string, map<string, map<string, Histo1DPtr> > > histos1D;
+            map<string, map<string, Histo1DPtr> >  histos1DAllAlgorithms;
             map<string, map<string, map<string, Histo2DPtr> > > histos2D;
             map<string, map<string, map<string, Profile1DPtr> > > profiles1D;
 
@@ -44,9 +45,12 @@ namespace Rivet {
 
 
             void bookFourMom(const string& name);
+						void bookFourMomAllAlgorithms(const string& label);
             void bookFourMomPair(const string& name1, const string& name2);
             void bookFourMomComp(const string& name, const string& name2);
             void bookFourMomColl(const string& name);
+
+						void fillFourMomAllAlgoritms(const string& label, const FourMomentum& p, double weight);
 
             void fillFourMom(const string& channel,
                     const string& name,
@@ -82,6 +86,8 @@ namespace Rivet {
 
             void fillGABHadHists(const Event& event,
                     const vector<string>& jetColls);
+						void fillBHadAssociated(const Event& event,const vector<string>& jetColls);
+
     };
 
 

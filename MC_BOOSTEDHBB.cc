@@ -60,24 +60,11 @@ namespace Rivet {
     /// Book histograms and initialise projections before the run
     void MC_BOOSTEDHBB::init() {
 
-        bookChannel("Rho05Min00Max10");
-        bookChannel("Rho10Min00Max10");
-        bookChannel("Rho20Min00Max10");
-        bookChannel("Rho30Min00Max10");
+        bookChannel("Rho10Min00Max1");
+        bookChannel("Rho20Min00Max1");
+        bookChannel("Rho30Min00Max1");
 
-        bookChannel("Rho05Min005Max10");
-        bookChannel("Rho10Min005Max10");
-        bookChannel("Rho20Min005Max10");
-        bookChannel("Rho30Min005Max10");
-
-        bookChannel("Rho05Min01Max10");
-        bookChannel("Rho10Min01Max10");
-        bookChannel("Rho20Min01Max10");
-        bookChannel("Rho30Min01Max10");
-
-        bookChannel("AKTTrack02");
         bookChannel("AKTTrack03");
-        bookChannel("AKTTrack04");
         bookChannel("AKTCalo04");
 
 
@@ -89,39 +76,16 @@ namespace Rivet {
 
 
         // variable-R jet projections
-        addProjection(FastJets(trackParts, aktVRPlugin(5*GeV, 0, 1)),
-                "Rho05Min00Max10");
         addProjection(FastJets(trackParts, aktVRPlugin(10*GeV, 0, 1)),
-                "Rho10Min00Max10");
+                "Rho10Min00Max1");
         addProjection(FastJets(trackParts, aktVRPlugin(20*GeV, 0, 1)),
-                "Rho20Min00Max10");
+                "Rho20Min00Max1");
         addProjection(FastJets(trackParts, aktVRPlugin(30*GeV, 0, 1)),
-                "Rho30Min00Max10");
-
-        addProjection(FastJets(trackParts, aktVRPlugin(5*GeV, 0.05, 1)),
-                "Rho05Min005Max10");
-        addProjection(FastJets(trackParts, aktVRPlugin(10*GeV, 0.05, 1)),
-                "Rho10Min005Max10");
-        addProjection(FastJets(trackParts, aktVRPlugin(20*GeV, 0.05, 1)),
-                "Rho20Min005Max10");
-        addProjection(FastJets(trackParts, aktVRPlugin(30*GeV, 0.05, 1)),
-                "Rho30Min005Max10");
-
-        addProjection(FastJets(trackParts, aktVRPlugin(5*GeV, 0.1, 1)),
-                "Rho05Min01Max10");
-        addProjection(FastJets(trackParts, aktVRPlugin(10*GeV, 0.1, 1)),
-                "Rho10Min01Max10");
-        addProjection(FastJets(trackParts, aktVRPlugin(20*GeV, 0.1, 1)),
-                "Rho20Min01Max10");
-        addProjection(FastJets(trackParts, aktVRPlugin(30*GeV, 0.1, 1)),
-                "Rho30Min01Max10");
+                "Rho30Min00Max1");
 
 
         // conventional jet projections
-        addProjection(FastJets(trackParts, FastJets::ANTIKT, 0.2), "AKTTrack02");
         addProjection(FastJets(trackParts, FastJets::ANTIKT, 0.3), "AKTTrack03");
-        addProjection(FastJets(trackParts, FastJets::ANTIKT, 0.4), "AKTTrack04");
-
         addProjection(FastJets(caloParts, FastJets::ANTIKT, 0.4), "AKTCalo04");
 
 
@@ -129,33 +93,24 @@ namespace Rivet {
         addProjection(HeavyHadrons(-2.5, 2.5, 5*GeV), "HeavyHadrons");
 
         //Now book histograms to plot
-        bookFourMomComp("DRBHad", "Jet");
-        bookFourMomComp("GABHad", "Jet");
-        bookFourMom("DRBHad");
-        bookFourMom("DRBHadJet");
-        bookFourMom("GABHad");
-        bookFourMom("GABHadJet");
-
-        return;
+        bookFourMom("Associated-BHad");
+				bookFourMomAllAlgorithms("All-BHad");
+				return;
     }
 
 
     /// Perform the per-event analysis
     void MC_BOOSTEDHBB::analyze(const Event& event) {
-        const Particles& bhads =
-            applyProjection<HeavyHadrons>(event, "HeavyHadrons").bHadrons();
+			const Particles& bhads = applyProjection<HeavyHadrons>(event, "HeavyHadrons").bHadrons();
+			if (!bhads.size()){
+				vetoEvent;
+			}
+			foreach (const Particle bHad, bhads) {
+				fillFourMomAllAlgoritms("All-BHad",bHad, event.weight());
+			}
+			fillBHadAssociated(event,channels);
 
-        if (!bhads.size())
-            vetoEvent;
-
-
-        fillGABHadHists(event, channels);
-
-        foreach (const Particle& bhad, bhads)
-            fillDRBHadHists(event, bhad, channels);
-
-
-        return;
+			return;
     }
 
 
@@ -247,16 +202,18 @@ namespace Rivet {
         foreach (const string& chan, channels) {
             histos1D[chan][label]["pt"] = bookHisto(chan + "_" + label + "_pt", label, ptlab, 25, 0, 2000*GeV);
             histos1D[chan][label]["eta"] = bookHisto(chan + "_" + label + "_eta", label, "$\\eta$", 25, -5, 5);
-            histos1D[chan][label]["m"] = bookHisto(chan + "_" + label + "_m", label, mlab, 25, 0, 1000*GeV);
-
-            histos2D[chan][label]["m_vs_pt"] = bookHisto(chan + "_" + label + "_m_vs_pt", label,
-                    ptlab, 25, 0, 2000*GeV,
-                    mlab, 25, 0, 1000*GeV);
         }
 
         return;
     }
+		void MC_BOOSTEDHBB::bookFourMomAllAlgorithms(const string& label) {
+			MSG_DEBUG("Booking " << label << " histograms.");
 
+			histos1DAllAlgorithms[label]["pt"] = bookHisto(label + "_pt", label, ptlab, 25, 0, 2000*GeV);
+			histos1DAllAlgorithms[label]["eta"] = bookHisto(label + "_eta", label, "$\\eta$", 25, -5, 5);
+
+			return;
+    }
 
     void MC_BOOSTEDHBB::bookFourMomPair(const string& label1,
             const string& label2) {
@@ -399,9 +356,13 @@ namespace Rivet {
 
         histos1D[channel][label]["pt"]->fill(p.pT(), weight);
         histos1D[channel][label]["eta"]->fill(p.eta(), weight);
-        histos1D[channel][label]["m"]->fill(p.mass(), weight);
-        histos2D[channel][label]["m_vs_pt"]->fill(p.pT(), p.mass(), weight);
+        return;
+    }
+    void MC_BOOSTEDHBB::fillFourMomAllAlgoritms(const string& label, const FourMomentum& p, double weight) {
+        MSG_DEBUG("Filling " << label << " histograms");
 
+        histos1DAllAlgorithms[label]["pt"]->fill(p.pT(), weight);
+        histos1DAllAlgorithms[label]["eta"]->fill(p.eta(), weight);
         return;
     }
 
@@ -537,6 +498,7 @@ namespace Rivet {
                 applyProjection<FastJets>(event, jetColl).jetsByPt(25*GeV);
 
             foreach (const Jet& jet, jets) {
+								//Note that jet.bTags() will return the b hadrons associated with that jet via ghost association.
                 foreach (const Particle& bhad, jet.bTags()) {
                     fillFourMomComp(jetColl, "GABHad", bhad,
                             "Jet", jet, weight);
@@ -549,6 +511,27 @@ namespace Rivet {
 
         return;
     }
+    void MC_BOOSTEDHBB::fillBHadAssociated(const Event& event,const vector<string>& jetColls) {
+
+        double weight = event.weight();
+
+        foreach (const string& jetColl, jetColls) {
+
+            const Jets& jets =
+                applyProjection<FastJets>(event, jetColl).jetsByPt(25*GeV);
+
+            foreach (const Jet& jet, jets) {
+								//Note that jet.bTags() will return the b hadrons associated with that jet via ghost association.
+                foreach (const Particle& bhad, jet.bTags()) {
+                    fillFourMom(jetColl, "Associated-BHad", bhad, weight);
+                }
+            }
+
+        }
+
+        return;
+    }
+
 
 
 
