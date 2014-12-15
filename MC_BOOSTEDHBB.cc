@@ -108,7 +108,7 @@ namespace Rivet {
 			foreach (const Particle bHad, bhads) {
 				fillFourMomAllAlgoritms("All-BHad",bHad, event.weight());
 			}
-			fillBHadAssociated(event,channels);
+//			fillBHadAssociated(event,channels);
 
 			return;
     }
@@ -118,6 +118,8 @@ namespace Rivet {
     void MC_BOOSTEDHBB::finalize() {
 
         // normalize to 1/fb
+				// We must remember to normalise the graphs to the total number of events measured in fb. 
+				// Note the weights are used since we produce some very unlikely events more often than predicted so we do not have to run for a very long time.
         double norm = 1000*crossSection()/sumOfWeights();
         for (map< string, map<string, map<string, Histo1DPtr> > >::iterator p = histos1D.begin(); p != histos1D.end(); ++p) {
             for (map<string, map<string, Histo1DPtr> >::iterator q = p->second.begin(); q != p->second.end(); ++q) {
@@ -144,6 +146,9 @@ namespace Rivet {
                 }
             }
         }
+				//Here we normalise all B-Had graph with pT.
+				histos1DAllAlgorithms["All-BHad"]["pt"]->scaleW(norm); 
+				histos1DAllAlgorithms["All-BHad"]["eta"]->scaleW(norm);
 
 
         return;
