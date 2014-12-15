@@ -6,6 +6,8 @@
 
 namespace Rivet {
 
+    typedef pair<string, double> JetCollection;
+
     class MC_BOOSTEDHBB : public Analysis {
         public:
             /// Constructor
@@ -24,6 +26,7 @@ namespace Rivet {
         private:
 
             vector<string> channels;
+            vector<JetCollection> collections;
             map<string, map<string, map<string, Histo1DPtr> > > histos1D;
             map<string, map<string, Histo1DPtr> >  histos1DAllAlgorithms;
             map<string, map<string, map<string, Histo2DPtr> > > histos2D;
@@ -45,12 +48,12 @@ namespace Rivet {
 
 
             void bookFourMom(const string& name);
-						void bookFourMomAllAlgorithms(const string& label);
+            void bookFourMomAllAlgorithms(const string& label);
             void bookFourMomPair(const string& name1, const string& name2);
             void bookFourMomComp(const string& name, const string& name2);
             void bookFourMomColl(const string& name);
 
-						void fillFourMomAllAlgoritms(const string& label, const FourMomentum& p, double weight);
+            void fillFourMomAllAlgorithms(const string& label, const FourMomentum& p, double weight);
 
             void fillFourMom(const string& channel,
                     const string& name,
@@ -72,21 +75,23 @@ namespace Rivet {
                     double weight);
 
             template <class T>
-            void fillFourMomColl(const string& channel,
-                    const string& name,
-                    const vector<T>& ps,
-                    double weight);
+                void fillFourMomColl(const string& channel,
+                        const string& name,
+                        const vector<T>& ps,
+                        double weight);
 
 
             Jets bTagged(const Jets& js);
 
             void fillDRBHadHists(const Event& event,
                     const Particle& bhad,
-                    const vector<string>& jetColls);
+                    const vector<JetCollection>& jetColls);
 
             void fillGABHadHists(const Event& event,
-                    const vector<string>& jetColls);
-						void fillBHadAssociated(const Event& event,const vector<string>& jetColls);
+                    const vector<JetCollection>& jetColls);
+
+            void fillBHadAssociated(const Event& event,
+                    const vector<JetCollection>& jetColls);
 
     };
 

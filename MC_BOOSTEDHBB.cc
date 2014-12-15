@@ -32,6 +32,7 @@ const string philab = "$\\phi$";
 namespace Rivet {
 
 
+
     fastjet::JetDefinition::Plugin *aktVRPlugin(double rho, double rmin, double rmax) {
         return new fastjet::contrib::VariableRPlugin(rho, rmin, rmax,
                 fastjet::contrib::VariableRPlugin::AKTLIKE);
@@ -60,12 +61,24 @@ namespace Rivet {
     /// Book histograms and initialise projections before the run
     void MC_BOOSTEDHBB::init() {
 
+        collections.clear();
+
         bookChannel("Rho10Min00Max1");
         bookChannel("Rho20Min00Max1");
         bookChannel("Rho30Min00Max1");
 
+        bookChannel("AKTTrack02");
         bookChannel("AKTTrack03");
         bookChannel("AKTCalo04");
+
+
+        // prepare the jet collections with their minimum pt cuts.
+        collections.push_back(make_pair("Rho10Min00Max1", 10*GeV));
+        collections.push_back(make_pair("Rho20Min00Max1", 10*GeV));
+        collections.push_back(make_pair("Rho30Min00Max1", 10*GeV));
+        collections.push_back(make_pair("AKTTrack02", 10*GeV));
+        collections.push_back(make_pair("AKTTrack03", 10*GeV));
+        collections.push_back(make_pair("AKTCalo04", 25*GeV));
 
 
         // calo jets constituents
@@ -85,6 +98,7 @@ namespace Rivet {
 
 
         // conventional jet projections
+        addProjection(FastJets(trackParts, FastJets::ANTIKT, 0.2), "AKTTrack02");
         addProjection(FastJets(trackParts, FastJets::ANTIKT, 0.3), "AKTTrack03");
         addProjection(FastJets(caloParts, FastJets::ANTIKT, 0.4), "AKTCalo04");
 
@@ -94,23 +108,23 @@ namespace Rivet {
 
         //Now book histograms to plot
         bookFourMom("Associated-BHad");
-				bookFourMomAllAlgorithms("All-BHad");
-				return;
+        bookFourMomAllAlgorithms("All-BHad");
+        return;
     }
 
 
     /// Perform the per-event analysis
     void MC_BOOSTEDHBB::analyze(const Event& event) {
-			const Particles& bhads = applyProjection<HeavyHadrons>(event, "HeavyHadrons").bHadrons();
-			if (!bhads.size()){
-				vetoEvent;
-			}
-			foreach (const Particle bHad, bhads) {
-				fillFourMomAllAlgoritms("All-BHad",bHad, event.weight());
-			}
-//			fillBHadAssociated(event,channels);
+        const Particles& bhads = applyProjection<HeavyHadrons>(event, "HeavyHadrons").bHadrons();
+        if (!bhads.size()){
+            vetoEvent;
+        }
+        foreach (const Particle bHad, bhads) {
+            fillFourMomAllAlgorithms("All-BHad",bHad, event.weight());
+        }
+        fillBHadAssociated(event, collections);
 
-			return;
+        return;
     }
 
 
@@ -118,8 +132,8 @@ namespace Rivet {
     void MC_BOOSTEDHBB::finalize() {
 
         // normalize to 1/fb
-				// We must remember to normalise the graphs to the total number of events measured in fb. 
-				// Note the weights are used since we produce some very unlikely events more often than predicted so we do not have to run for a very long time.
+        // We must remember to normalise the graphs to the total number of events measured in fb. 
+        // Note the weights are used since we produce some very unlikely events more often than predicted so we do not have to run for a very long time.
         double norm = 1000*crossSection()/sumOfWeights();
         for (map< string, map<string, map<string, Histo1DPtr> > >::iterator p = histos1D.begin(); p != histos1D.end(); ++p) {
             for (map<string, map<string, Histo1DPtr> >::iterator q = p->second.begin(); q != p->second.end(); ++q) {
@@ -146,9 +160,9 @@ namespace Rivet {
                 }
             }
         }
-				//Here we normalise all B-Had graph with pT.
-				histos1DAllAlgorithms["All-BHad"]["pt"]->scaleW(norm); 
-				histos1DAllAlgorithms["All-BHad"]["eta"]->scaleW(norm);
+        //Here we normalise all B-Had graph with pT.
+        histos1DAllAlgorithms["All-BHad"]["pt"]->scaleW(norm); 
+        histos1DAllAlgorithms["All-BHad"]["eta"]->scaleW(norm);
 
 
         return;
@@ -211,13 +225,13 @@ namespace Rivet {
 
         return;
     }
-		void MC_BOOSTEDHBB::bookFourMomAllAlgorithms(const string& label) {
-			MSG_DEBUG("Booking " << label << " histograms.");
+    void MC_BOOSTEDHBB::bookFourMomAllAlgorithms(const string& label) {
+        MSG_DEBUG("Booking " << label << " histograms.");
 
-			histos1DAllAlgorithms[label]["pt"] = bookHisto(label + "_pt", label, ptlab, 25, 0, 2000*GeV);
-			histos1DAllAlgorithms[label]["eta"] = bookHisto(label + "_eta", label, "$\\eta$", 25, -5, 5);
+        histos1DAllAlgorithms[label]["pt"] = bookHisto(label + "_pt", label, ptlab, 25, 0, 2000*GeV);
+        histos1DAllAlgorithms[label]["eta"] = bookHisto(label + "_eta", label, "$\\eta$", 25, -5, 5);
 
-			return;
+        return;
     }
 
     void MC_BOOSTEDHBB::bookFourMomPair(const string& label1,
@@ -363,7 +377,8 @@ namespace Rivet {
         histos1D[channel][label]["eta"]->fill(p.eta(), weight);
         return;
     }
-    void MC_BOOSTEDHBB::fillFourMomAllAlgoritms(const string& label, const FourMomentum& p, double weight) {
+
+    void MC_BOOSTEDHBB::fillFourMomAllAlgorithms(const string& label, const FourMomentum& p, double weight) {
         MSG_DEBUG("Filling " << label << " histograms");
 
         histos1DAllAlgorithms[label]["pt"]->fill(p.pT(), weight);
@@ -467,23 +482,27 @@ namespace Rivet {
 
 
     void MC_BOOSTEDHBB::fillDRBHadHists(const Event& event,
-            const Particle& bhad, const vector<string>& jetColls) {
+            const Particle& bhad, const vector<JetCollection>& jetColls) {
 
         int jidx;
         double weight = event.weight();
 
-        foreach (const string& jetColl, jetColls) {
+        string name;
+        double ptMin;
+        foreach (const JetCollection& jetColl, jetColls) {
+            name = jetColl.first;
+            ptMin = jetColl.second;
 
             const Jets& jets =
-                applyProjection<FastJets>(event, jetColl).jetsByPt(25*GeV);
+                applyProjection<FastJets>(event, name).jetsByPt(ptMin);
 
             jidx = drMinJetIdx(bhad, jets);
 
             if (jidx >= 0) {
-                fillFourMomComp(jetColl, "DRBHad", bhad,
+                fillFourMomComp(name, "DRBHad", bhad,
                         "Jet", jets[jidx], weight);
-                fillFourMom(jetColl, "DRBHad", bhad, weight);
-                fillFourMom(jetColl, "DRBHadJet", jets[jidx], weight);
+                fillFourMom(name, "DRBHad", bhad, weight);
+                fillFourMom(name, "DRBHadJet", jets[jidx], weight);
             }
 
         }
@@ -493,22 +512,26 @@ namespace Rivet {
 
 
     void MC_BOOSTEDHBB::fillGABHadHists(const Event& event,
-            const vector<string>& jetColls) {
+            const vector<JetCollection>& jetColls) {
 
         double weight = event.weight();
 
-        foreach (const string& jetColl, jetColls) {
+        string name;
+        double ptMin;
+        foreach (const JetCollection& jetColl, jetColls) {
+            name = jetColl.first;
+            ptMin = jetColl.second;
 
             const Jets& jets =
-                applyProjection<FastJets>(event, jetColl).jetsByPt(25*GeV);
+                applyProjection<FastJets>(event, name).jetsByPt(ptMin);
 
             foreach (const Jet& jet, jets) {
-								//Note that jet.bTags() will return the b hadrons associated with that jet via ghost association.
+                //Note that jet.bTags() will return the b hadrons associated with that jet via ghost association.
                 foreach (const Particle& bhad, jet.bTags()) {
-                    fillFourMomComp(jetColl, "GABHad", bhad,
+                    fillFourMomComp(name, "GABHad", bhad,
                             "Jet", jet, weight);
-                    fillFourMom(jetColl, "GABHad", bhad, weight);
-                    fillFourMom(jetColl, "GABHadJet", jet, weight);
+                    fillFourMom(name, "GABHad", bhad, weight);
+                    fillFourMom(name, "GABHadJet", jet, weight);
                 }
             }
 
@@ -516,19 +539,25 @@ namespace Rivet {
 
         return;
     }
-    void MC_BOOSTEDHBB::fillBHadAssociated(const Event& event,const vector<string>& jetColls) {
+
+    void MC_BOOSTEDHBB::fillBHadAssociated(const Event& event,
+            const vector<JetCollection>& jetColls) {
 
         double weight = event.weight();
 
-        foreach (const string& jetColl, jetColls) {
+        string name;
+        double ptMin;
+        foreach (const JetCollection& jetColl, jetColls) {
+            name = jetColl.first;
+            ptMin = jetColl.second;
 
             const Jets& jets =
-                applyProjection<FastJets>(event, jetColl).jetsByPt(25*GeV);
+                applyProjection<FastJets>(event, name).jetsByPt(ptMin);
 
             foreach (const Jet& jet, jets) {
-								//Note that jet.bTags() will return the b hadrons associated with that jet via ghost association.
+                //Note that jet.bTags() will return the b hadrons associated with that jet via ghost association.
                 foreach (const Particle& bhad, jet.bTags()) {
-                    fillFourMom(jetColl, "Associated-BHad", bhad, weight);
+                    fillFourMom(name, "Associated-BHad", bhad, weight);
                 }
             }
 
