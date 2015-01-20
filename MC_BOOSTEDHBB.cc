@@ -110,8 +110,7 @@ namespace Rivet {
         bookFourMom("GABHad");
         bookFourMom("GABHadJet");
         bookFourMomComp("GABHad", "Jet");
-        bookFourMom("AllJet");
-        bookFourMomAllAlgorithms("AllBHad");
+        bookFourMomAllChannels("AllBHad");
         return;
     }
 
@@ -125,7 +124,7 @@ namespace Rivet {
         }
 
         foreach (const Particle bHad, bhads)
-            fillFourMomAllAlgorithms("AllBHad", bHad, event.weight());
+            fillFourMomAllChannels("AllBHad", bHad, event.weight());
 
         fillGABHadHists(event, collections);
 
@@ -166,8 +165,8 @@ namespace Rivet {
             }
         }
         //Here we normalise all B-Had graph with pT.
-        histos1DAllAlgorithms["AllBHad"]["pt"]->scaleW(norm); 
-        histos1DAllAlgorithms["AllBHad"]["eta"]->scaleW(norm);
+        histos1DAllChannels["AllBHad"]["pt"]->scaleW(norm); 
+        histos1DAllChannels["AllBHad"]["eta"]->scaleW(norm);
 
 
         return;
@@ -230,11 +229,12 @@ namespace Rivet {
 
         return;
     }
-    void MC_BOOSTEDHBB::bookFourMomAllAlgorithms(const string& label) {
+
+    void MC_BOOSTEDHBB::bookFourMomAllChannels(const string& label) {
         MSG_DEBUG("Booking " << label << " histograms.");
 
-        histos1DAllAlgorithms[label]["pt"] = bookHisto(label + "_pt", label, ptlab, 25, 0, 2000*GeV);
-        histos1DAllAlgorithms[label]["eta"] = bookHisto(label + "_eta", label, "$\\eta$", 25, -5, 5);
+        histos1DAllChannels[label]["pt"] = bookHisto(label + "_pt", label, ptlab, 25, 0, 2000*GeV);
+        histos1DAllChannels[label]["eta"] = bookHisto(label + "_eta", label, "$\\eta$", 25, -5, 5);
 
         return;
     }
@@ -375,6 +375,78 @@ namespace Rivet {
     }
 
 
+    void MC_BOOSTEDHBB::bookBTagging(const string& label) {
+
+        foreach (const string& chan, channels) {
+            // book constituent fraction histograms
+            histos1D[chan][label]["ConstitFracFromBHad"] =
+                bookHisto(chan + "_" + label + "_ConstitFracFromBHad", label,
+                        "jet constituent fraction from B hadron", 25, 0, 1.0);
+
+            histos2D[chan][label]["ConstitFracFromBHad_vs_BHad_pt"] =
+                bookHisto(chan + "_" + label + "_ConstitFracFromBHad", label,
+                        ptlab, 25, 0, 2000*GeV,
+                        "jet constituent fraction from B hadron", 25, 0, 1.0);
+
+            histos2D[chan][label]["ConstitFracFromBHad_vs_Jet_pt"] =
+                bookHisto(chan + "_" + label + "_ConstitFracFromBHad", label,
+                        ptlab, 25, 0, 2000*GeV,
+                        "jet constituent fraction from B hadron", 25, 0, 1.0);
+
+
+            // book child fraction histograms
+            histos1D[chan][label]["BHadChildFracInJet"] =
+                bookHisto(chan + "_" + label + "_BHadChildFracInJet", label,
+                        "B hadron child fraction in jet", 25, 0, 1.0);
+
+            histos2D[chan][label]["BHadChildFracInJet_vs_BHad_pt"] =
+                bookHisto(chan + "_" + label + "_BHadChildFracInJet_vs_BHad_pt", label,
+                        ptlab, 25, 0, 2000*GeV,
+                        "B hadron child fraction in jet", 25, 0, 1.0);
+
+            histos2D[chan][label]["BHadChildFracInJet_vs_Jet_pt"] =
+                bookHisto(chan + "_" + label + "_BHadChildFracInJet_vs_Jet_pt", label,
+                        ptlab, 25, 0, 2000*GeV,
+                        "B hadron child fraction in jet", 25, 0, 1.0);
+
+
+            // book pt fraction histograms
+            histos1D[chan][label]["PtFracFromBHad"] =
+                bookHisto(chan + "_" + label + "_PtFracFromBHad", label,
+                        "jet $p_T$ fraction from B hadron", 25, 0, 1.0);
+
+            histos2D[chan][label]["PtFracFromBHad_vs_BHad_pt"] =
+                bookHisto(chan + "_" + label + "_PtFracFromBHad", label,
+                        ptlab, 25, 0, 2000*GeV,
+                        "jet $p_T$ fraction from B hadron", 25, 0, 1.0);
+
+            histos2D[chan][label]["PtFracFromBHad_vs_Jet_pt"] =
+                bookHisto(chan + "_" + label + "_PtFracFromBHad", label,
+                        ptlab, 25, 0, 2000*GeV,
+                        "jet $p_T$ fraction from B hadron", 25, 0, 1.0);
+
+
+            // book child pt fraction histograms
+            histos1D[chan][label]["BHadChildPtFracInJet"] =
+                bookHisto(chan + "_" + label + "_BHadChildPtFracInJet", label,
+                        "B hadron child $p_T$ fraction in jet", 25, 0, 1.0);
+
+            histos2D[chan][label]["BHadChildPtFracInJet_vs_BHad_pt"] =
+                bookHisto(chan + "_" + label + "_BHadChildPtFracInJet_vs_BHad_pt", label,
+                        ptlab, 25, 0, 2000*GeV,
+                        "B hadron child $p_T$ fraction in jet", 25, 0, 1.0);
+
+            histos2D[chan][label]["BHadChildPtFracInJet_vs_Jet_pt"] =
+                bookHisto(chan + "_" + label + "_BHadChildPtFracInJet_vs_Jet_pt", label,
+                        ptlab, 25, 0, 2000*GeV,
+                        "B hadron child $p_T$ fraction in jet", 25, 0, 1.0);
+        }
+
+
+        return;
+    }
+
+
     void MC_BOOSTEDHBB::fillFourMom(const string& channel, const string& label, const FourMomentum& p, double weight) {
         MSG_DEBUG("Filling " << label << " histograms");
 
@@ -383,11 +455,11 @@ namespace Rivet {
         return;
     }
 
-    void MC_BOOSTEDHBB::fillFourMomAllAlgorithms(const string& label, const FourMomentum& p, double weight) {
+    void MC_BOOSTEDHBB::fillFourMomAllChannels(const string& label, const FourMomentum& p, double weight) {
         MSG_DEBUG("Filling " << label << " histograms");
 
-        histos1DAllAlgorithms[label]["pt"]->fill(p.pT(), weight);
-        histos1DAllAlgorithms[label]["eta"]->fill(p.eta(), weight);
+        histos1DAllChannels[label]["pt"]->fill(p.pT(), weight);
+        histos1DAllChannels[label]["eta"]->fill(p.eta(), weight);
         return;
     }
 
@@ -461,18 +533,74 @@ namespace Rivet {
 
 
     template <class T>
-        void MC_BOOSTEDHBB::fillFourMomColl(const string& channel,
-                const string& label, const vector<T>& ps,
-                double weight) {
+    void MC_BOOSTEDHBB::fillFourMomColl(const string& channel,
+            const string& label, const vector<T>& ps,
+            double weight) {
 
-            MSG_DEBUG("Filling " << ps.size() << " members of collection " << label);
-            histos1D[channel][label]["n"]->fill(ps.size(), weight);
+        MSG_DEBUG("Filling " << ps.size() << " members of collection " << label);
+        histos1D[channel][label]["n"]->fill(ps.size(), weight);
 
-            foreach (const T& p, ps)
-                fillFourMom(channel, label, p.mom(), weight);
+        foreach (const T& p, ps)
+            fillFourMom(channel, label, p.mom(), weight);
 
-            return;
-        }
+        return;
+    }
+
+
+    void MC_BOOSTEDHBB::fillBTagging(const string& channel,
+            const string& label, const Jet& jet, const Particle& bhad,
+            double weight) {
+
+        // TODO
+        // visible and charged particle fractions?
+
+        const Particles& commonParts = constsFromPart(jet, bhad);
+
+        double constitFrac = double(commonParts.size())/jet.constituents().size();
+        double childFrac = double(commonParts.size())/bhad.stableDescendants().size();
+
+        double commonPartPt = 0.0;
+        foreach (const Particle& p, commonParts)
+            commonPartPt += p.pt();
+
+        double constitPtFrac = commonPartPt/jet.pt();
+        double childPtFrac = commonPartPt/bhad.pt();
+
+        // fill constituent fraction histograms
+        histos1D[channel][label]["ConstitFracFromBHad"]->fill(constitFrac, weight);
+
+        histos2D[channel][label]["ConstitFracFromBHad_vs_BHad_pt"]->fill(bhad.pt(), constitFrac, weight);
+
+        histos2D[channel][label]["ConstitFracFromBHad_vs_Jet_pt"]->fill(jet.pt(), constitFrac, weight);
+
+
+        // fill child fraction histograms
+        histos1D[channel][label]["BHadChildFracInJet"]->fill(childFrac, weight);
+
+        histos2D[channel][label]["BHadChildFracInJet_vs_BHad_pt"]->fill(bhad.pt(), childFrac, weight);
+
+        histos2D[channel][label]["BHadChildFracInJet_vs_Jet_pt"]->fill(jet.pt(), childFrac, weight);
+
+
+        // fill pt fraction histograms
+        histos1D[channel][label]["PtFracFromBHad"]->fill(constitPtFrac, weight);
+
+        histos2D[channel][label]["PtFracFromBHad_vs_BHad_pt"]->fill(bhad.pt(), constitPtFrac, weight);
+
+        histos2D[channel][label]["PtFracFromBHad_vs_Jet_pt"]->fill(jet.pt(), constitPtFrac, weight);
+
+
+        // fill child pt fraction histograms
+        histos1D[channel][label]["BHadChildPtFracInJet"]->fill(childPtFrac, weight);
+
+        histos2D[channel][label]["BHadChildPtFracInJet_vs_BHad_pt"]->fill(bhad.pt(), childPtFrac, weight);
+
+        histos2D[channel][label]["BHadChildPtFracInJet_vs_Jet_pt"]->fill(jet.pt(), childPtFrac, weight);
+
+
+        return;
+    }
+
 
 
     Jets MC_BOOSTEDHBB::bTagged(const Jets& js) {
@@ -576,9 +704,22 @@ namespace Rivet {
     }
 
 
-    Particles MC_BOOSTEDHBB::constsFromPart(const Jet& jet, const Particle& bhad) {
-        const Particles& BChildren = bhad.tableDescendants();
-        return 1.0;
+    const Particles MC_BOOSTEDHBB::constsFromPart(const Jet& jet, const Particle& bhad) const {
+        const Particles& BChildren = bhad.stableDescendants();
+
+        // TODO
+        // I'm sure this is sloooooow.
+        Particles parts;
+        foreach (const Particle& p, jet.constituents()) {
+            foreach (const Particle& child, BChildren) {
+                if (p == child) {
+                    parts.push_back(p);
+                    break;
+                }
+            }
+        }
+
+        return parts;
     }
 
 

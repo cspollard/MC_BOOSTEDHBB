@@ -28,11 +28,12 @@ namespace Rivet {
             vector<string> channels;
             vector<JetCollection> collections;
             map<string, map<string, map<string, Histo1DPtr> > > histos1D;
-            map<string, map<string, Histo1DPtr> >  histos1DAllAlgorithms;
+            map<string, map<string, Histo1DPtr> >  histos1DAllChannels;
             map<string, map<string, map<string, Histo2DPtr> > > histos2D;
             map<string, map<string, map<string, Profile1DPtr> > > profiles1D;
 
 
+            void bookJetcollection(const string& collName);
             void bookChannel(const string& channel);
 
             Histo1DPtr bookHisto(const string& name, const string& title,
@@ -48,12 +49,13 @@ namespace Rivet {
 
 
             void bookFourMom(const string& name);
-            void bookFourMomAllAlgorithms(const string& label);
+            void bookFourMomAllChannels(const string& label);
             void bookFourMomPair(const string& name1, const string& name2);
             void bookFourMomComp(const string& name, const string& name2);
             void bookFourMomColl(const string& name);
+            void bookBTagging(const string& name);
 
-            void fillFourMomAllAlgorithms(const string& label, const FourMomentum& p, double weight);
+            void fillFourMomAllChannels(const string& label, const FourMomentum& p, double weight);
 
             void fillFourMom(const string& channel,
                     const string& name,
@@ -75,10 +77,17 @@ namespace Rivet {
                     double weight);
 
             template <class T>
-                void fillFourMomColl(const string& channel,
-                        const string& name,
-                        const vector<T>& ps,
-                        double weight);
+            void fillFourMomColl(const string& channel,
+                    const string& name,
+                    const vector<T>& ps,
+                    double weight);
+
+
+            void fillBTagging(const string& channel,
+                    const string& name,
+                    const Jet& jet,
+                    const Particle& bhad,
+                    double weight);
 
 
             Jets bTagged(const Jets& js);
@@ -92,6 +101,8 @@ namespace Rivet {
 
             void fillBHadAssociated(const Event& event,
                     const vector<JetCollection>& jetColls);
+
+            const Particles constsFromPart(const Jet& jet, const Particle& bhad) const;
 
     };
 
