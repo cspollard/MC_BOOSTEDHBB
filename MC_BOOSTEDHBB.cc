@@ -107,8 +107,11 @@ namespace Rivet {
         addProjection(HeavyHadrons(-2.5, 2.5, 5*GeV), "HeavyHadrons");
 
         //Now book histograms to plot
-        bookFourMom("Associated-BHad");
-        bookFourMomAllAlgorithms("All-BHad");
+        bookFourMom("GABHad");
+        bookFourMom("GABHadJet");
+        bookFourMomComp("GABHad", "Jet");
+        bookFourMom("AllJet");
+        bookFourMomAllAlgorithms("AllBHad");
         return;
     }
 
@@ -116,13 +119,15 @@ namespace Rivet {
     /// Perform the per-event analysis
     void MC_BOOSTEDHBB::analyze(const Event& event) {
         const Particles& bhads = applyProjection<HeavyHadrons>(event, "HeavyHadrons").bHadrons();
-        if (!bhads.size()){
+
+        if (!bhads.size()) {
             vetoEvent;
         }
-        foreach (const Particle bHad, bhads) {
-            fillFourMomAllAlgorithms("All-BHad",bHad, event.weight());
-        }
-        fillBHadAssociated(event, collections);
+
+        foreach (const Particle bHad, bhads)
+            fillFourMomAllAlgorithms("AllBHad", bHad, event.weight());
+
+        fillGABHadHists(event, collections);
 
         return;
     }
@@ -161,8 +166,8 @@ namespace Rivet {
             }
         }
         //Here we normalise all B-Had graph with pT.
-        histos1DAllAlgorithms["All-BHad"]["pt"]->scaleW(norm); 
-        histos1DAllAlgorithms["All-BHad"]["eta"]->scaleW(norm);
+        histos1DAllAlgorithms["AllBHad"]["pt"]->scaleW(norm); 
+        histos1DAllAlgorithms["AllBHad"]["eta"]->scaleW(norm);
 
 
         return;
@@ -525,7 +530,11 @@ namespace Rivet {
             const Jets& jets =
                 applyProjection<FastJets>(event, name).jetsByPt(ptMin);
 
+            cout << "about to loop over all " << name << " jets." << endl;
             foreach (const Jet& jet, jets) {
+                cout << "found a jet with pt eta phi:" << endl
+                    << jet.pt() << " " << jet.eta() << " " << jet.phi() << endl;
+
                 //Note that jet.bTags() will return the b hadrons associated with that jet via ghost association.
                 foreach (const Particle& bhad, jet.bTags()) {
                     fillFourMomComp(name, "GABHad", bhad,
@@ -564,6 +573,12 @@ namespace Rivet {
         }
 
         return;
+    }
+
+
+    Particles MC_BOOSTEDHBB::constsFromPart(const Jet& jet, const Particle& bhad) {
+        const Particles& BChildren = bhad.tableDescendants();
+        return 1.0;
     }
 
 
