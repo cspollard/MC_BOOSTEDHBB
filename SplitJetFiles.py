@@ -24,7 +24,8 @@ for k, ao in aodict.iteritems():
     m = label.search(k)
     if m:
         lab = m.group(0)[:-1]
-    else: continue
+    else:
+        continue
 
     ao.path = label.sub("", ao.path)
     if lab in yfiledict:

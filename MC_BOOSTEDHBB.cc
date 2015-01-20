@@ -32,6 +32,56 @@ const string philab = "$\\phi$";
 namespace Rivet {
 
 
+    const Particles chargedParts(const Particles& parts) {
+
+        Particles cps;
+
+        foreach (const Particle& p, parts)
+            if (p.threeCharge()) cps.push_back(p);
+
+        return cps;
+    }
+
+    const Particles visibleParts(const Particles& parts) {
+
+        Particles vps;
+
+        foreach (const Particle& p, parts)
+            if (!p.isNeutrino()) vps.push_back(p);
+
+        return vps;
+    }
+
+
+    template <class T>
+    double ptSum(const std::vector<T>& ps) {
+        double sum = 0.0;
+
+        foreach (const T& p, ps)
+            sum += p.pt();
+
+        return sum;
+    }
+
+
+    const Particles constitsFromPart(const Jet& jet, const Particle& bhad) {
+        const Particles& BChildren = bhad.stableDescendants();
+
+        // TODO
+        // I'm sure this is sloooooow.
+        Particles parts;
+        foreach (const Particle& p, jet.constituents()) {
+            foreach (const Particle& child, BChildren) {
+                if (p == child) {
+                    parts.push_back(p);
+                    break;
+                }
+            }
+        }
+
+        return parts;
+    }
+
 
     fastjet::JetDefinition::Plugin *aktVRPlugin(double rho, double rmin, double rmax) {
         return new fastjet::contrib::VariableRPlugin(rho, rmin, rmax,
@@ -63,9 +113,9 @@ namespace Rivet {
 
         collections.clear();
 
-        bookChannel("Rho10Min00Max1");
-        bookChannel("Rho20Min00Max1");
-        bookChannel("Rho30Min00Max1");
+        bookChannel("Rho10Min00Max10");
+        bookChannel("Rho20Min00Max10");
+        bookChannel("Rho30Min00Max10");
 
         bookChannel("AKTTrack02");
         bookChannel("AKTTrack03");
@@ -73,9 +123,9 @@ namespace Rivet {
 
 
         // prepare the jet collections with their minimum pt cuts.
-        collections.push_back(make_pair("Rho10Min00Max1", 10*GeV));
-        collections.push_back(make_pair("Rho20Min00Max1", 10*GeV));
-        collections.push_back(make_pair("Rho30Min00Max1", 10*GeV));
+        collections.push_back(make_pair("Rho10Min00Max10", 10*GeV));
+        collections.push_back(make_pair("Rho20Min00Max10", 10*GeV));
+        collections.push_back(make_pair("Rho30Min00Max10", 10*GeV));
         collections.push_back(make_pair("AKTTrack02", 10*GeV));
         collections.push_back(make_pair("AKTTrack03", 10*GeV));
         collections.push_back(make_pair("AKTCalo04", 25*GeV));
@@ -90,11 +140,11 @@ namespace Rivet {
 
         // variable-R jet projections
         addProjection(FastJets(trackParts, aktVRPlugin(10*GeV, 0, 1)),
-                "Rho10Min00Max1");
+                "Rho10Min00Max10");
         addProjection(FastJets(trackParts, aktVRPlugin(20*GeV, 0, 1)),
-                "Rho20Min00Max1");
+                "Rho20Min00Max10");
         addProjection(FastJets(trackParts, aktVRPlugin(30*GeV, 0, 1)),
-                "Rho30Min00Max1");
+                "Rho30Min00Max10");
 
 
         // conventional jet projections
@@ -110,6 +160,7 @@ namespace Rivet {
         bookFourMom("GABHad");
         bookFourMom("GABHadJet");
         bookFourMomComp("GABHad", "Jet");
+        bookBTagging("GABHad");
         bookFourMomAllChannels("AllBHad");
         return;
     }
@@ -136,8 +187,6 @@ namespace Rivet {
     void MC_BOOSTEDHBB::finalize() {
 
         // normalize to 1/fb
-        // We must remember to normalise the graphs to the total number of events measured in fb. 
-        // Note the weights are used since we produce some very unlikely events more often than predicted so we do not have to run for a very long time.
         double norm = 1000*crossSection()/sumOfWeights();
         for (map< string, map<string, map<string, Histo1DPtr> > >::iterator p = histos1D.begin(); p != histos1D.end(); ++p) {
             for (map<string, map<string, Histo1DPtr> >::iterator q = p->second.begin(); q != p->second.end(); ++q) {
@@ -164,6 +213,7 @@ namespace Rivet {
                 }
             }
         }
+
         //Here we normalise all B-Had graph with pT.
         histos1DAllChannels["AllBHad"]["pt"]->scaleW(norm); 
         histos1DAllChannels["AllBHad"]["eta"]->scaleW(norm);
@@ -383,6 +433,16 @@ namespace Rivet {
                 bookHisto(chan + "_" + label + "_ConstitFracFromBHad", label,
                         "jet constituent fraction from B hadron", 25, 0, 1.0);
 
+            profiles1D[chan][label]["mean_ConstitFracFromBHad_vs_BHad_pt"] =
+                bookProfile(chan + "_" + label + "_maen_ConstitFracFromBHad_vs_BHad_pt", label, 
+                        ptlab, 25, 0, 2000*GeV,
+                        "jet constituent fraction from B hadron");
+
+            profiles1D[chan][label]["mean_ConstitFracFromBHad_vs_Jet_pt"] =
+                bookProfile(chan + "-" + label + "_mean_ConstitFracFromBHad_vs_Jet_pt", label, 
+                        ptlab, 25, 0, 2000*GeV,
+                        "jet constituent fraction from B hadron");
+
             histos2D[chan][label]["ConstitFracFromBHad_vs_BHad_pt"] =
                 bookHisto(chan + "_" + label + "_ConstitFracFromBHad", label,
                         ptlab, 25, 0, 2000*GeV,
@@ -398,6 +458,16 @@ namespace Rivet {
             histos1D[chan][label]["BHadChildFracInJet"] =
                 bookHisto(chan + "_" + label + "_BHadChildFracInJet", label,
                         "B hadron child fraction in jet", 25, 0, 1.0);
+
+            profiles1D[chan][label]["mean_BHadChildFracInJet_vs_BHad_pt"] =
+                bookProfile(chan + "_" + label + "_mean_BHadChildFracInJet_vs_BHad_pt", label, 
+                        ptlab, 25, 0, 2000*GeV,
+                        "B hadron child fraction in jet");
+
+            profiles1D[chan][label]["mean_BHadChildFracInJet_vs_Jet_pt"] =
+                bookProfile(chan + "_" + label + "_mean_BHadChildFracInJet_vs_Jet_pt", label, 
+                        ptlab, 25, 0, 2000*GeV,
+                        "B hadron child fraction in jet");
 
             histos2D[chan][label]["BHadChildFracInJet_vs_BHad_pt"] =
                 bookHisto(chan + "_" + label + "_BHadChildFracInJet_vs_BHad_pt", label,
@@ -415,13 +485,23 @@ namespace Rivet {
                 bookHisto(chan + "_" + label + "_PtFracFromBHad", label,
                         "jet $p_T$ fraction from B hadron", 25, 0, 1.0);
 
+            profiles1D[chan][label]["mean_PtFracFromBHad_vs_BHad_pt"] =
+                bookProfile(chan + "_" + label + "_mean_PtFracFromBHad_vs_BHad_pt", label,
+                        ptlab, 25, 0, 2000*GeV,
+                        "jet $p_T$ fraction from B hadron");
+
+            profiles1D[chan][label]["mean_PtFracFromBHad_vs_Jet_pt"] =
+                bookProfile(chan + "_" + label + "_mean_PtFracFromBHad_vs_Jet_pt", label,
+                        ptlab, 25, 0, 2000*GeV,
+                        "jet $p_T$ fraction from B hadron");
+
             histos2D[chan][label]["PtFracFromBHad_vs_BHad_pt"] =
-                bookHisto(chan + "_" + label + "_PtFracFromBHad", label,
+                bookHisto(chan + "_" + label + "_PtFracFromBHad_vs_BHad_pt", label,
                         ptlab, 25, 0, 2000*GeV,
                         "jet $p_T$ fraction from B hadron", 25, 0, 1.0);
 
             histos2D[chan][label]["PtFracFromBHad_vs_Jet_pt"] =
-                bookHisto(chan + "_" + label + "_PtFracFromBHad", label,
+                bookHisto(chan + "_" + label + "_PtFracFromBHad_vs_Jet_pt", label,
                         ptlab, 25, 0, 2000*GeV,
                         "jet $p_T$ fraction from B hadron", 25, 0, 1.0);
 
@@ -430,6 +510,16 @@ namespace Rivet {
             histos1D[chan][label]["BHadChildPtFracInJet"] =
                 bookHisto(chan + "_" + label + "_BHadChildPtFracInJet", label,
                         "B hadron child $p_T$ fraction in jet", 25, 0, 1.0);
+
+            profiles1D[chan][label]["mean_BHadChildPtFracInJet_vs_BHad_pt"] =
+                bookProfile(chan + "_" + label + "_mean_BHadChildPtFracInJet_vs_BHad_pt", label,
+                        ptlab, 25, 0, 2000*GeV,
+                        "B hadron child $p_T$ fraction in jet");
+
+            profiles1D[chan][label]["mean_BHadChildPtFracInJet_vs_Jet_pt"] =
+                bookProfile(chan + "_" + label + "_mean_BHadChildPtFracInJet_vs_Jet_pt", label,
+                        ptlab, 25, 0, 2000*GeV,
+                        "B hadron child $p_T$ fraction in jet");
 
             histos2D[chan][label]["BHadChildPtFracInJet_vs_BHad_pt"] =
                 bookHisto(chan + "_" + label + "_BHadChildPtFracInJet_vs_BHad_pt", label,
@@ -554,47 +644,91 @@ namespace Rivet {
         // TODO
         // visible and charged particle fractions?
 
-        const Particles& commonParts = constsFromPart(jet, bhad);
+        const Particles& commonParts = constitsFromPart(jet, bhad);
+        const Particles& visibleCommonParts = visibleParts(commonParts);
+        const Particles& chargedCommonParts = chargedParts(visibleCommonParts);
 
+        double commonPartsPtSum = ptSum(commonParts);
+        double visibleCommonPartsPtSum = ptSum(visibleCommonParts);
+        double chargedCommonPartsPtSum = ptSum(chargedCommonParts);
+
+        const Particles& children = bhad.stableDescendants();
+        const Particles& visibleChildren = visibleParts(children);
+        const Particles& chargedChildren = chargedParts(visibleChildren);
+
+        double childrenPtSum = bhad.pt();
+        double visibleChildrenPtSum = ptSum(visibleChildren);
+        double chargedChildrenPtSum = ptSum(chargedChildren);
+
+        const Particles& constits = jet.constituents();
+        const Particles& visibleConstits = visibleParts(constits);
+        const Particles& chargedConstits = chargedParts(visibleConstits);
+
+        double constitsPtSum = jet.pt();
+        double visibleConstitsPtSum = ptSum(visibleConstits);
+        double chargedConstitsPtSum = ptSum(chargedConstits);
+
+        // constituent fractions
         double constitFrac = double(commonParts.size())/jet.constituents().size();
         double childFrac = double(commonParts.size())/bhad.stableDescendants().size();
 
-        double commonPartPt = 0.0;
-        foreach (const Particle& p, commonParts)
-            commonPartPt += p.pt();
+        double visibleConstitFrac = double(visibleCommonParts.size())/visibleConstits.size();
+        double visibleChildFrac = double(visibleCommonParts.size())/visibleChildren.size();
 
-        double constitPtFrac = commonPartPt/jet.pt();
-        double childPtFrac = commonPartPt/bhad.pt();
+        double chargedConstitFrac = double(chargedCommonParts.size())/chargedConstits.size();
+        double chargedChildFrac = double(chargedCommonParts.size())/chargedChildren.size();
+
+        // pt fractions
+        double constitPtFrac = commonPartsPtSum/constitsPtSum;
+        double childrenPtFrac = commonPartsPtSum/childrenPtSum;
+
+        double visibleConstitPtFrac = visibleCommonPartsPtSum/visibleConstitsPtSum;
+        double visibleChildrenPtFrac = visibleCommonPartsPtSum/visibleChildrenPtSum;
+
+        double chargedConstitPtFrac = chargedCommonPartsPtSum/chargedConstitsPtSum;
+        double chargedChildrenPtFrac = chargedCommonPartsPtSum/chargedChildrenPtSum;
 
         // fill constituent fraction histograms
         histos1D[channel][label]["ConstitFracFromBHad"]->fill(constitFrac, weight);
 
-        histos2D[channel][label]["ConstitFracFromBHad_vs_BHad_pt"]->fill(bhad.pt(), constitFrac, weight);
+        profiles1D[channel][label]["mean_ConstitFracFromBHad_vs_BHad_pt"]->fill(bhad.pt(), constitFrac, weight);
+        profiles1D[channel][label]["mean_ConstitFracFromBHad_vs_Jet_pt"]->fill(jet.pt(), constitFrac, weight);
 
+        histos2D[channel][label]["ConstitFracFromBHad_vs_BHad_pt"]->fill(bhad.pt(), constitFrac, weight);
         histos2D[channel][label]["ConstitFracFromBHad_vs_Jet_pt"]->fill(jet.pt(), constitFrac, weight);
+
+        // TODO
+        // HERE
+        // Constit->Visible/ChargedConstit
 
 
         // fill child fraction histograms
         histos1D[channel][label]["BHadChildFracInJet"]->fill(childFrac, weight);
 
-        histos2D[channel][label]["BHadChildFracInJet_vs_BHad_pt"]->fill(bhad.pt(), childFrac, weight);
+        profiles1D[channel][label]["mean_BHadChildFracInJet_vs_BHad_pt"]->fill(bhad.pt(), childFrac, weight);
+        profiles1D[channel][label]["mean_BHadChildFracInJet_vs_Jet_pt"]->fill(jet.pt(), childFrac, weight);
 
+        histos2D[channel][label]["BHadChildFracInJet_vs_BHad_pt"]->fill(bhad.pt(), childFrac, weight);
         histos2D[channel][label]["BHadChildFracInJet_vs_Jet_pt"]->fill(jet.pt(), childFrac, weight);
 
 
         // fill pt fraction histograms
         histos1D[channel][label]["PtFracFromBHad"]->fill(constitPtFrac, weight);
 
-        histos2D[channel][label]["PtFracFromBHad_vs_BHad_pt"]->fill(bhad.pt(), constitPtFrac, weight);
+        profiles1D[channel][label]["mean_PtFracFromBHad_vs_BHad_pt"]->fill(bhad.pt(), constitPtFrac, weight);
+        profiles1D[channel][label]["mean_PtFracFromBHad_vs_Jet_pt"]->fill(jet.pt(), constitPtFrac, weight);
 
+        histos2D[channel][label]["PtFracFromBHad_vs_BHad_pt"]->fill(bhad.pt(), constitPtFrac, weight);
         histos2D[channel][label]["PtFracFromBHad_vs_Jet_pt"]->fill(jet.pt(), constitPtFrac, weight);
 
 
         // fill child pt fraction histograms
         histos1D[channel][label]["BHadChildPtFracInJet"]->fill(childPtFrac, weight);
 
-        histos2D[channel][label]["BHadChildPtFracInJet_vs_BHad_pt"]->fill(bhad.pt(), childPtFrac, weight);
+        profiles1D[channel][label]["mean_BHadChildPtFracInJet_vs_BHad_pt"]->fill(bhad.pt(), childPtFrac, weight);
+        profiles1D[channel][label]["mean_BHadChildPtFracInJet_vs_Jet_pt"]->fill(jet.pt(), childPtFrac, weight);
 
+        histos2D[channel][label]["BHadChildPtFracInJet_vs_BHad_pt"]->fill(bhad.pt(), childPtFrac, weight);
         histos2D[channel][label]["BHadChildPtFracInJet_vs_Jet_pt"]->fill(jet.pt(), childPtFrac, weight);
 
 
@@ -658,17 +792,14 @@ namespace Rivet {
             const Jets& jets =
                 applyProjection<FastJets>(event, name).jetsByPt(ptMin);
 
-            cout << "about to loop over all " << name << " jets." << endl;
             foreach (const Jet& jet, jets) {
-                cout << "found a jet with pt eta phi:" << endl
-                    << jet.pt() << " " << jet.eta() << " " << jet.phi() << endl;
 
-                //Note that jet.bTags() will return the b hadrons associated with that jet via ghost association.
                 foreach (const Particle& bhad, jet.bTags()) {
                     fillFourMomComp(name, "GABHad", bhad,
                             "Jet", jet, weight);
                     fillFourMom(name, "GABHad", bhad, weight);
                     fillFourMom(name, "GABHadJet", jet, weight);
+                    fillBTagging(name, "GABHad", jet, bhad, weight);
                 }
             }
 
@@ -692,7 +823,6 @@ namespace Rivet {
                 applyProjection<FastJets>(event, name).jetsByPt(ptMin);
 
             foreach (const Jet& jet, jets) {
-                //Note that jet.bTags() will return the b hadrons associated with that jet via ghost association.
                 foreach (const Particle& bhad, jet.bTags()) {
                     fillFourMom(name, "Associated-BHad", bhad, weight);
                 }
@@ -703,24 +833,6 @@ namespace Rivet {
         return;
     }
 
-
-    const Particles MC_BOOSTEDHBB::constsFromPart(const Jet& jet, const Particle& bhad) const {
-        const Particles& BChildren = bhad.stableDescendants();
-
-        // TODO
-        // I'm sure this is sloooooow.
-        Particles parts;
-        foreach (const Particle& p, jet.constituents()) {
-            foreach (const Particle& child, BChildren) {
-                if (p == child) {
-                    parts.push_back(p);
-                    break;
-                }
-            }
-        }
-
-        return parts;
-    }
 
 
 
