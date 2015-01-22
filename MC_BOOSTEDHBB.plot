@@ -1,5 +1,5 @@
 # BEGIN PLOT /*
 LogX=0
-LogY=1
+LogY=0
 LogZ=0
 # END PLOT
