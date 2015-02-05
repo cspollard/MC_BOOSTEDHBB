@@ -117,13 +117,20 @@ namespace Rivet {
 
         collections.clear();
 
-        bookChannel("Rho10Min01Max04");
-        bookChannel("Rho03Min00Max10");
-        bookChannel("Rho05Min00Max10");
-        bookChannel("Rho07Min00Max10");
-        bookChannel("Rho10Min00Max10");
-        bookChannel("Rho20Min00Max10");
-        bookChannel("Rho30Min00Max10");
+        bookChannel("Rho10Min01Max04Track");
+        bookChannel("Rho03Min00Max10Track");
+        bookChannel("Rho05Min00Max10Track");
+        bookChannel("Rho07Min00Max10Track");
+        bookChannel("Rho10Min00Max10Track");
+        bookChannel("Rho20Min00Max10Track");
+        bookChannel("Rho30Min00Max10Track");
+
+        bookChannel("Rho30Min02Max04Calo");
+        bookChannel("Rho20Min02Max10Calo");
+        bookChannel("Rho30Min02Max10Calo");
+        bookChannel("Rho40Min02Max10Calo");
+        bookChannel("Rho50Min02Max10Calo");
+        bookChannel("Rho60Min02Max10Calo");
 
         bookChannel("AKTTrack02");
         bookChannel("AKTTrack03");
@@ -131,15 +138,28 @@ namespace Rivet {
 
 
         // prepare the jet collections with their minimum pt cuts.
-        collections.push_back(make_pair("Rho10Min01Max04", 10*GeV));
-        collections.push_back(make_pair("Rho03Min00Max10", 10*GeV));
-        collections.push_back(make_pair("Rho05Min00Max10", 10*GeV));
-        collections.push_back(make_pair("Rho07Min00Max10", 10*GeV));
-        collections.push_back(make_pair("Rho10Min00Max10", 10*GeV));
-        collections.push_back(make_pair("Rho20Min00Max10", 10*GeV));
-        collections.push_back(make_pair("Rho30Min00Max10", 10*GeV));
+        collections.push_back(make_pair("Rho30Min02Max04Calo", 25*GeV));
+        collections.push_back(make_pair("Rho20Min02Max10Calo", 25*GeV));
+        collections.push_back(make_pair("Rho30Min02Max10Calo", 25*GeV));
+        collections.push_back(make_pair("Rho40Min02Max10Calo", 25*GeV));
+        collections.push_back(make_pair("Rho50Min02Max10Calo", 25*GeV));
+        collections.push_back(make_pair("Rho60Min02Max10Calo", 25*GeV));
+
+        collections.push_back(make_pair("Rho10Min01Max04Track", 10*GeV));
+        collections.push_back(make_pair("Rho03Min00Max10Track", 10*GeV));
+        collections.push_back(make_pair("Rho05Min00Max10Track", 10*GeV));
+        collections.push_back(make_pair("Rho07Min00Max10Track", 10*GeV));
+        collections.push_back(make_pair("Rho10Min00Max10Track", 10*GeV));
+        collections.push_back(make_pair("Rho20Min00Max10Track", 10*GeV));
+        collections.push_back(make_pair("Rho30Min00Max10Track", 10*GeV));
+
+        collections.push_back(make_pair("AKTTrack01", 10*GeV));
         collections.push_back(make_pair("AKTTrack02", 10*GeV));
         collections.push_back(make_pair("AKTTrack03", 10*GeV));
+        collections.push_back(make_pair("AKTTrack04", 10*GeV));
+
+        collections.push_back(make_pair("AKTCalo02", 25*GeV));
+        collections.push_back(make_pair("AKTCalo03", 25*GeV));
         collections.push_back(make_pair("AKTCalo04", 25*GeV));
 
 
@@ -152,24 +172,42 @@ namespace Rivet {
 
         // variable-R jet projections
         addProjection(FastJets(trackParts, aktVRPlugin(10*GeV, 0.1, 0.4)),
-                "Rho10Min01Max04");
+                "Rho10Min01Max04Track");
         addProjection(FastJets(trackParts, aktVRPlugin(03*GeV, 0, 1)),
-                "Rho03Min00Max10");
+                "Rho03Min00Max10Track");
         addProjection(FastJets(trackParts, aktVRPlugin(05*GeV, 0, 1)),
-                "Rho05Min00Max10");
+                "Rho05Min00Max10Track");
         addProjection(FastJets(trackParts, aktVRPlugin(07*GeV, 0, 1)),
-                "Rho07Min00Max10");
+                "Rho07Min00Max10Track");
         addProjection(FastJets(trackParts, aktVRPlugin(10*GeV, 0, 1)),
-                "Rho10Min00Max10");
+                "Rho10Min00Max10Track");
         addProjection(FastJets(trackParts, aktVRPlugin(20*GeV, 0, 1)),
-                "Rho20Min00Max10");
+                "Rho20Min00Max10Track");
         addProjection(FastJets(trackParts, aktVRPlugin(30*GeV, 0, 1)),
-                "Rho30Min00Max10");
+                "Rho30Min00Max10Track");
 
+
+        addProjection(FastJets(caloParts, aktVRPlugin(10*GeV, 0.2, 0.4)),
+                "Rho30Min02Max04Calo");
+        addProjection(FastJets(caloParts, aktVRPlugin(20*GeV, 0.2, 1)),
+                "Rho20Min02Max10Calo");
+        addProjection(FastJets(caloParts, aktVRPlugin(30*GeV, 0.2, 1)),
+                "Rho30Min02Max10Calo");
+        addProjection(FastJets(caloParts, aktVRPlugin(40*GeV, 0.2, 1)),
+                "Rho40Min02Max10Calo");
+        addProjection(FastJets(caloParts, aktVRPlugin(50*GeV, 0.2, 1)),
+                "Rho50Min02Max10Calo");
+        addProjection(FastJets(caloParts, aktVRPlugin(60*GeV, 0.2, 1)),
+                "Rho60Min02Max10Calo");
 
         // conventional jet projections
+        addProjection(FastJets(trackParts, FastJets::ANTIKT, 0.1), "AKTTrack01");
         addProjection(FastJets(trackParts, FastJets::ANTIKT, 0.2), "AKTTrack02");
         addProjection(FastJets(trackParts, FastJets::ANTIKT, 0.3), "AKTTrack03");
+        addProjection(FastJets(trackParts, FastJets::ANTIKT, 0.4), "AKTTrack04");
+
+        addProjection(FastJets(caloParts, FastJets::ANTIKT, 0.2), "AKTCalo02");
+        addProjection(FastJets(caloParts, FastJets::ANTIKT, 0.3), "AKTCalo03");
         addProjection(FastJets(caloParts, FastJets::ANTIKT, 0.4), "AKTCalo04");
 
 
