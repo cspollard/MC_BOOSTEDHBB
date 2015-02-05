@@ -20,6 +20,7 @@ using std::string;
 using namespace Rivet::Cuts;
 
 
+// TODO
 // global variables. ick
 const string ptlab = "$p_T$ / GeV";
 const string mlab = "mass / GeV";
@@ -27,6 +28,9 @@ const string drlab = "$\\Delta R$";
 const string etalab = "$\\eta$";
 const string philab = "$\\phi$";
 
+
+// TODO
+// clean up histogram booking and filling
 
 
 namespace Rivet {
@@ -114,6 +118,9 @@ namespace Rivet {
         collections.clear();
 
         bookChannel("Rho10Min01Max04");
+        bookChannel("Rho03Min00Max10");
+        bookChannel("Rho05Min00Max10");
+        bookChannel("Rho07Min00Max10");
         bookChannel("Rho10Min00Max10");
         bookChannel("Rho20Min00Max10");
         bookChannel("Rho30Min00Max10");
@@ -125,6 +132,9 @@ namespace Rivet {
 
         // prepare the jet collections with their minimum pt cuts.
         collections.push_back(make_pair("Rho10Min01Max04", 10*GeV));
+        collections.push_back(make_pair("Rho03Min00Max10", 10*GeV));
+        collections.push_back(make_pair("Rho05Min00Max10", 10*GeV));
+        collections.push_back(make_pair("Rho07Min00Max10", 10*GeV));
         collections.push_back(make_pair("Rho10Min00Max10", 10*GeV));
         collections.push_back(make_pair("Rho20Min00Max10", 10*GeV));
         collections.push_back(make_pair("Rho30Min00Max10", 10*GeV));
@@ -143,6 +153,12 @@ namespace Rivet {
         // variable-R jet projections
         addProjection(FastJets(trackParts, aktVRPlugin(10*GeV, 0.1, 0.4)),
                 "Rho10Min01Max04");
+        addProjection(FastJets(trackParts, aktVRPlugin(03*GeV, 0, 1)),
+                "Rho03Min00Max10");
+        addProjection(FastJets(trackParts, aktVRPlugin(05*GeV, 0, 1)),
+                "Rho05Min00Max10");
+        addProjection(FastJets(trackParts, aktVRPlugin(07*GeV, 0, 1)),
+                "Rho07Min00Max10");
         addProjection(FastJets(trackParts, aktVRPlugin(10*GeV, 0, 1)),
                 "Rho10Min00Max10");
         addProjection(FastJets(trackParts, aktVRPlugin(20*GeV, 0, 1)),
