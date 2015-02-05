@@ -117,6 +117,13 @@ namespace Rivet {
 
         collections.clear();
 
+        bookChannel("Rho30Min02Max04Calo");
+        bookChannel("Rho20Min02Max10Calo");
+        bookChannel("Rho30Min02Max10Calo");
+        bookChannel("Rho40Min02Max10Calo");
+        bookChannel("Rho50Min02Max10Calo");
+        bookChannel("Rho60Min02Max10Calo");
+
         bookChannel("Rho10Min01Max04Track");
         bookChannel("Rho03Min00Max10Track");
         bookChannel("Rho05Min00Max10Track");
@@ -125,16 +132,14 @@ namespace Rivet {
         bookChannel("Rho20Min00Max10Track");
         bookChannel("Rho30Min00Max10Track");
 
-        bookChannel("Rho30Min02Max04Calo");
-        bookChannel("Rho20Min02Max10Calo");
-        bookChannel("Rho30Min02Max10Calo");
-        bookChannel("Rho40Min02Max10Calo");
-        bookChannel("Rho50Min02Max10Calo");
-        bookChannel("Rho60Min02Max10Calo");
+        bookChannel("AKTCalo02");
+        bookChannel("AKTCalo03");
+        bookChannel("AKTCalo04");
 
+        bookChannel("AKTTrack01");
         bookChannel("AKTTrack02");
         bookChannel("AKTTrack03");
-        bookChannel("AKTCalo04");
+        bookChannel("AKTTrack04");
 
 
         // prepare the jet collections with their minimum pt cuts.
@@ -153,14 +158,14 @@ namespace Rivet {
         collections.push_back(make_pair("Rho20Min00Max10Track", 10*GeV));
         collections.push_back(make_pair("Rho30Min00Max10Track", 10*GeV));
 
+        collections.push_back(make_pair("AKTCalo02", 25*GeV));
+        collections.push_back(make_pair("AKTCalo03", 25*GeV));
+        collections.push_back(make_pair("AKTCalo04", 25*GeV));
+
         collections.push_back(make_pair("AKTTrack01", 10*GeV));
         collections.push_back(make_pair("AKTTrack02", 10*GeV));
         collections.push_back(make_pair("AKTTrack03", 10*GeV));
         collections.push_back(make_pair("AKTTrack04", 10*GeV));
-
-        collections.push_back(make_pair("AKTCalo02", 25*GeV));
-        collections.push_back(make_pair("AKTCalo03", 25*GeV));
-        collections.push_back(make_pair("AKTCalo04", 25*GeV));
 
 
         // calo jets constituents
