@@ -132,14 +132,14 @@ namespace Rivet {
         bookChannel("Rho20Min00Max10Track");
         bookChannel("Rho30Min00Max10Track");
 
-        bookChannel("AKTCalo02");
-        bookChannel("AKTCalo03");
-        bookChannel("AKTCalo04");
+        bookChannel("AKT02Calo");
+        bookChannel("AKT03Calo");
+        bookChannel("AKT04Calo");
 
-        bookChannel("AKTTrack01");
-        bookChannel("AKTTrack02");
-        bookChannel("AKTTrack03");
-        bookChannel("AKTTrack04");
+        bookChannel("AKT01Track");
+        bookChannel("AKT02Track");
+        bookChannel("AKT03Track");
+        bookChannel("AKT04Track");
 
 
         // prepare the jet collections with their minimum pt cuts.
@@ -158,18 +158,18 @@ namespace Rivet {
         collections.push_back(make_pair("Rho20Min00Max10Track", 10*GeV));
         collections.push_back(make_pair("Rho30Min00Max10Track", 10*GeV));
 
-        collections.push_back(make_pair("AKTCalo02", 25*GeV));
-        collections.push_back(make_pair("AKTCalo03", 25*GeV));
-        collections.push_back(make_pair("AKTCalo04", 25*GeV));
+        collections.push_back(make_pair("AKT02Calo", 25*GeV));
+        collections.push_back(make_pair("AKT03Calo", 25*GeV));
+        collections.push_back(make_pair("AKT04Calo", 25*GeV));
 
-        collections.push_back(make_pair("AKTTrack01", 10*GeV));
-        collections.push_back(make_pair("AKTTrack02", 10*GeV));
-        collections.push_back(make_pair("AKTTrack03", 10*GeV));
-        collections.push_back(make_pair("AKTTrack04", 10*GeV));
+        collections.push_back(make_pair("AKT01Track", 10*GeV));
+        collections.push_back(make_pair("AKT02Track", 10*GeV));
+        collections.push_back(make_pair("AKT03Track", 10*GeV));
+        collections.push_back(make_pair("AKT04Track", 10*GeV));
 
 
         // calo jets constituents
-        FinalState caloParts(-2.5, 2.5, 0.5*GeV);
+        VisibleFinalState caloParts(-2.5, 2.5, 0.5*GeV);
 
         // track jets constituents
         ChargedFinalState trackParts(-2.5, 2.5, 0.5*GeV);
@@ -192,7 +192,7 @@ namespace Rivet {
                 "Rho30Min00Max10Track");
 
 
-        addProjection(FastJets(caloParts, aktVRPlugin(10*GeV, 0.2, 0.4)),
+        addProjection(FastJets(caloParts, aktVRPlugin(30*GeV, 0.2, 0.4)),
                 "Rho30Min02Max04Calo");
         addProjection(FastJets(caloParts, aktVRPlugin(20*GeV, 0.2, 1)),
                 "Rho20Min02Max10Calo");
@@ -206,14 +206,14 @@ namespace Rivet {
                 "Rho60Min02Max10Calo");
 
         // conventional jet projections
-        addProjection(FastJets(trackParts, FastJets::ANTIKT, 0.1), "AKTTrack01");
-        addProjection(FastJets(trackParts, FastJets::ANTIKT, 0.2), "AKTTrack02");
-        addProjection(FastJets(trackParts, FastJets::ANTIKT, 0.3), "AKTTrack03");
-        addProjection(FastJets(trackParts, FastJets::ANTIKT, 0.4), "AKTTrack04");
+        addProjection(FastJets(trackParts, FastJets::ANTIKT, 0.1), "AKT01Track");
+        addProjection(FastJets(trackParts, FastJets::ANTIKT, 0.2), "AKT02Track");
+        addProjection(FastJets(trackParts, FastJets::ANTIKT, 0.3), "AKT03Track");
+        addProjection(FastJets(trackParts, FastJets::ANTIKT, 0.4), "AKT04Track");
 
-        addProjection(FastJets(caloParts, FastJets::ANTIKT, 0.2), "AKTCalo02");
-        addProjection(FastJets(caloParts, FastJets::ANTIKT, 0.3), "AKTCalo03");
-        addProjection(FastJets(caloParts, FastJets::ANTIKT, 0.4), "AKTCalo04");
+        addProjection(FastJets(caloParts, FastJets::ANTIKT, 0.2), "AKT02Calo");
+        addProjection(FastJets(caloParts, FastJets::ANTIKT, 0.3), "AKT03Calo");
+        addProjection(FastJets(caloParts, FastJets::ANTIKT, 0.4), "AKT04Calo");
 
 
         // projection to find b-hadrons
@@ -502,7 +502,7 @@ namespace Rivet {
                         "jet constituent fraction from B hadron");
 
             profiles1D[chan][label]["mean_ConstitFracFromBHad_vs_Jet_pt"] =
-                bookProfile(chan + "-" + label + "_mean_ConstitFracFromBHad_vs_Jet_pt", label, 
+                bookProfile(chan + "_" + label + "_mean_ConstitFracFromBHad_vs_Jet_pt", label, 
                         ptlab, 25, 0, 2000*GeV,
                         "jet constituent fraction from B hadron");
 
@@ -527,7 +527,7 @@ namespace Rivet {
                         "jet constituent fraction from B hadron");
 
             profiles1D[chan][label]["mean_VisibleConstitFracFromBHad_vs_Jet_pt"] =
-                bookProfile(chan + "-" + label + "_mean_VisibleConstitFracFromBHad_vs_Jet_pt", label, 
+                bookProfile(chan + "_" + label + "_mean_VisibleConstitFracFromBHad_vs_Jet_pt", label, 
                         ptlab, 25, 0, 2000*GeV,
                         "jet constituent fraction from B hadron");
 
@@ -552,7 +552,7 @@ namespace Rivet {
                         "jet constituent fraction from B hadron");
 
             profiles1D[chan][label]["mean_ChargedConstitFracFromBHad_vs_Jet_pt"] =
-                bookProfile(chan + "-" + label + "_mean_ChargedConstitFracFromBHad_vs_Jet_pt", label, 
+                bookProfile(chan + "_" + label + "_mean_ChargedConstitFracFromBHad_vs_Jet_pt", label, 
                         ptlab, 25, 0, 2000*GeV,
                         "jet constituent fraction from B hadron");
 
