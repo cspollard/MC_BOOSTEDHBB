@@ -18,7 +18,7 @@ aodict = yoda.core.read(args[0], True)
 
 yfiledict = {}
 
-label = re.compile(r"Rho[0-9]*Min[0-9]*Max[0-9]*_|AKTTrack[0-9]*_|AKTCalo[0-9]*_")
+label = re.compile(r"(Rho[0-9]*Min[0-9]*Max[0-9]*|AKT[0-9]*|AKT[0-9]*_)(Track|Calo)_")
 
 for k, ao in aodict.iteritems():
     m = label.search(k)

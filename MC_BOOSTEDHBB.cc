@@ -457,6 +457,20 @@ namespace Rivet {
                         "\\left< $p_{T," + label1 + "}  - p_{T," + label2 + "} / GeV$ \\right>");
 
 
+            // (dr, pt1)
+            n = label + "_dr_vs_" + label1 + "_pt";
+            histos2D[chan][label][n] =
+                bookHisto(chan + "_" + n, label,
+                        "p_{T," + label1 + "} / GeV$", 25, 0, 500*GeV,
+                        "$\\Delta R(" + label1 + "," + label2 + "}$", 40, 0, 4.0);
+
+            // (dr, pt2)
+            n = label + "_dr_vs_" + label2 + "_pt";
+            histos2D[chan][label][n] =
+                bookHisto(chan + "_" + n, label,
+                        "p_{T," + label2 + "} / GeV$", 25, 0, 500*GeV,
+                        "$\\Delta R(" + label1 + "," + label2 + "}$", 40, 0, 4.0);
+
 
             // (dr, dpt)
             histos2D[chan][label]["dr_vs_dpt"] =
@@ -875,6 +889,11 @@ namespace Rivet {
 
         n = "mean_" + label + "_dpt_vs_dr";
         profiles1D[channel][label][n]->fill(dr, dpt, weight);
+
+        n = label + "_dr_vs_" + label1 + "_pt";
+        histos2D[channel][label][n]->fill(pt1, dr, weight);
+        n = label + "_dr_vs_" + label2 + "_pt";
+        histos2D[channel][label][n]->fill(pt2, dr, weight);
 
         histos2D[channel][label]["dr_vs_dpt"]->fill(dpt, dr, weight);
 
